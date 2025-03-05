@@ -1,4 +1,11 @@
-<script setup></script>
+<script setup>
+const navItems = [
+  { label: "Главная страница", to: "/" },
+  { label: "Модель угроз", to: "/threat-modelling" },
+  { label: "Справочная информация", to: "/reference" },
+  { label: "Поддержка", to: "/help" },
+];
+</script>
 
 <template>
   <nav class="navbar navbar-expand-lg">
@@ -9,20 +16,20 @@
         </span>
 
         <div class="nav-buttons">
-          <router-link to="/" class="nav-btn">Главная страница</router-link>
-          <router-link to="/threat-modelling" class="nav-btn"
-            >Создание модели угроз</router-link
+          <router-link
+            v-for="item in navItems"
+            :key="item.to"
+            :to="item.to"
+            class="nav-btn"
           >
-          <router-link to="/reference" class="nav-btn"
-            >Справочная информация</router-link
-          >
-          <router-link to="/help" class="nav-btn">Поддержка</router-link>
+            {{ item.label }}
+          </router-link>
         </div>
       </div>
 
-      <div class="user-icon">
+      <router-link to="/profile" class="user-icon">
         <img src="@/assets/Person.png" alt="Person" />
-      </div>
+      </router-link>
     </div>
   </nav>
 </template>

@@ -12,8 +12,7 @@ const message = ref("Добро пожаловать на главную стр�
 
 <style scoped>
 .home {
-  font-family: Arial, sans-serif;
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 0.5rem;
 }
 </style>
