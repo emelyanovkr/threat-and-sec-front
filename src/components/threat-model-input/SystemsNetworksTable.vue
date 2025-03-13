@@ -28,10 +28,6 @@ const localData = ref(
       ]
 );
 
-// сделать следующую страницу
-// todo: для всех текстовых полей, где надо вводить текст сделать единый файл со стилями
-// аналогично для всех других элементов
-
 let nextId = localData.value.length ? localData.value.length + 1 : 2;
 
 function addRow() {

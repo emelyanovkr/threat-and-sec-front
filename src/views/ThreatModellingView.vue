@@ -3,6 +3,8 @@ import { computed, ref, watch } from "vue";
 import StepIndicator from "@/components/StepIndicator.vue";
 import SystemsNetworksTable from "@/components/threat-model-input/SystemsNetworksTable.vue";
 import GeneralInformation from "@/components/threat-model-input/GeneralInformation.vue";
+import InfluenceObjects from "@/components/threat-model-input/InfluenceObjects.vue";
+import RisksAndConsequences from "@/components/threat-model-input/RisksAndConsequences.vue";
 
 const steps = [
   "Общая информация",
@@ -15,9 +17,6 @@ const steps = [
   "Генерация отчета",
 ];
 
-// переделать таблицу на втором шаге
-// спросить у бота полное описание того что да как работает
-
 const currentStep = ref(0);
 
 const formData = ref({
@@ -27,10 +26,9 @@ const formData = ref({
     significance: "",
     systemScale: "",
   },
-  category: "",
-  significance: "",
-  systemScale: "",
   systemData: [],
+  influenceObjects: [],
+  risksAndConsequences: [],
 });
 
 const showErrorMessage = ref(false);
@@ -107,12 +105,12 @@ function prevStep() {
               <SystemsNetworksTable v-model="formData.systemData" />
             </div>
             <div v-else-if="currentStep === 2">
-
+              <InfluenceObjects v-model="formData.influenceObjects" />
             </div>
             <div v-else-if="currentStep === 3">
+              <RisksAndConsequences v-model="formData.risksAndConsequences" />
             </div>
-            <div v-else-if="currentStep === 4">
-            </div>
+            <div v-else-if="currentStep === 4"></div>
           </div>
         </div>
       </div>
