@@ -170,6 +170,6 @@ const dataModel = computed({
 
 .form-check-input[type="radio"]:focus {
   outline: none;
-  box-shadow: 0 0 0 1px rgba(161, 25, 25, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(161, 25, 25, 0.25);
 }
 </style>

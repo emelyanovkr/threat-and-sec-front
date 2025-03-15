@@ -43,6 +43,7 @@ defineProps({
       border-radius: 0.25rem;
       color: #6c757d;
       font-size: 0.9rem;
+      white-space: nowrap;
     }
 
     .step.active {

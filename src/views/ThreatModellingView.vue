@@ -5,6 +5,7 @@ import SystemsNetworksTable from "@/components/threat-model-input/SystemsNetwork
 import GeneralInformation from "@/components/threat-model-input/GeneralInformation.vue";
 import InfluenceObjects from "@/components/threat-model-input/InfluenceObjects.vue";
 import RisksAndConsequences from "@/components/threat-model-input/RisksAndConsequences.vue";
+import ViolatorsInfo from "@/components/threat-model-input/ViolatorsInfo.vue";
 
 const steps = [
   "Общая информация",
@@ -29,6 +30,7 @@ const formData = ref({
   systemData: [],
   influenceObjects: [],
   risksAndConsequences: [],
+  attackersInfo: [],
 });
 
 const showErrorMessage = ref(false);
@@ -110,7 +112,9 @@ function prevStep() {
             <div v-else-if="currentStep === 3">
               <RisksAndConsequences v-model="formData.risksAndConsequences" />
             </div>
-            <div v-else-if="currentStep === 4"></div>
+            <div v-else-if="currentStep === 4">
+              <ViolatorsInfo v-model="formData.attackersInfo" />
+            </div>
           </div>
         </div>
       </div>
@@ -144,8 +148,6 @@ function prevStep() {
 .nav-buttons {
   @extend .btn;
   @extend .btn-primary;
-  display: flex;
-  justify-content: space-between;
   border-radius: 0.25rem;
   border-color: #a11919;
   background-color: #a11919;
