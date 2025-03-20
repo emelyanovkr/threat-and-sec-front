@@ -11,22 +11,24 @@ const emit = defineEmits(["update:modelValue"]);
 
 const defaultItems = [
   { label: "Аппаратное обеспечение", applies: false },
-  { label: "Сетевое ПО", applies: false },
+  { label: "Системное ПО", applies: false },
   { label: "Программное обеспечение", applies: false },
-  { label: "Сетевое оборудование", applies: false },
+  { label: "Сетевое ПО", applies: false },
   { label: "Прикладное ПО", applies: false },
-  { label: "Среда виртуализации", applies: false },
+  { label: "Средства виртуализации", applies: false },
   { label: "Информационная система", applies: false },
   { label: "Сервер", applies: false },
   { label: "Сетевой узел, сетевой трафик", applies: false },
   {
-    label: "Микропрограмма и аппаратное обеспечение BIOS/UEFI",
+    label: "Микропрограммное и аппаратное обеспечение BIOS/UEFI",
     applies: false,
   },
   { label: "Мобильное устройство", applies: false },
-  { label: "Облачная платформа", applies: false },
-  { label: "Система управления базами данных", applies: false },
-  { label: "Технологии Big Data (различная больших данных)", applies: false },
+  { label: "Облачная система", applies: false },
+  { label: "Объекты файловой системы", applies: false },
+  { label: "Грид-система", applies: false },
+  { label: "Технологии Big Data (хранилища больших данных)", applies: false },
+  { label: "Суперкомпьютеры", applies: false },
 ];
 
 const items = ref(

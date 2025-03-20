@@ -6,6 +6,7 @@ import GeneralInformation from "@/components/threat-model-input/GeneralInformati
 import InfluenceObjects from "@/components/threat-model-input/InfluenceObjects.vue";
 import RisksAndConsequences from "@/components/threat-model-input/RisksAndConsequences.vue";
 import ViolatorsInfo from "@/components/threat-model-input/ViolatorsInfo.vue";
+import ThreatsExecutionMethods from "@/components/threat-model-input/ThreatsExecutionMethods.vue";
 
 const steps = [
   "Общая информация",
@@ -31,6 +32,7 @@ const formData = ref({
   influenceObjects: [],
   risksAndConsequences: [],
   attackersInfo: [],
+  threatsExecution: [],
 });
 
 const showErrorMessage = ref(false);
@@ -114,6 +116,9 @@ function prevStep() {
             </div>
             <div v-else-if="currentStep === 4">
               <ViolatorsInfo v-model="formData.attackersInfo" />
+            </div>
+            <div v-else-if="currentStep === 5">
+              <ThreatsExecutionMethods v-model="formData.threatsExecution" />
             </div>
           </div>
         </div>

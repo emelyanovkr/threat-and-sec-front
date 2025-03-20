@@ -157,14 +157,13 @@ const selectedRiskCategories = computed(() => {
 </template>
 
 <style scoped>
-
 .form-check-input[type="checkbox"] {
   &:checked {
     background-color: #a11919;
     border-color: #a11919;
   }
 
-  &:focus{
+  &:focus {
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(161, 25, 25, 0.25);
     border-color: #a11919;
