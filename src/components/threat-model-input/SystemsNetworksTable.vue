@@ -90,13 +90,6 @@ watch(
 </script>
 
 <template>
-  <head>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-    <title></title>
-  </head>
   <div>
     <h3>Описание систем и сетей</h3>
     <div class="table-responsive">

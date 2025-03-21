@@ -7,7 +7,7 @@ const props = defineProps({
     default: () => [],
   },
 });
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "update:actualThreats"]);
 
 const defaultItems = [
   { label: "Аппаратное обеспечение", applies: false },
@@ -45,10 +45,6 @@ function resetAll() {
   items.value = items.value.map((item) => ({ ...item, applies: false }));
 }
 
-function toggleLock() {
-  locked.value = !locked.value;
-}
-
 const actionButtonText = computed(() =>
   locked.value ? "Редактировать" : "Сохранить"
 );
@@ -70,6 +66,37 @@ watch(
   },
   { deep: true }
 );
+
+async function saveImpactObjects() {
+  const selectedObjects = items.value
+    .filter((item) => item.applies)
+    .map((item) => item.label);
+
+  try {
+    const response = await fetch("/api/relevant-threats", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(selectedObjects),
+    });
+    if (!response.ok) {
+      throw new Error("Ошибка получения данных с сервера");
+    }
+    const actualThreats = await response.json();
+    emit("update:modelValue", items.value);
+    emit("update:actualThreats", actualThreats);
+  } catch (error) {
+    console.error("Ошибка сохранения объектов воздействия:", error);
+  }
+}
+
+function handleSave() {
+  if (!locked.value) {
+    saveImpactObjects();
+  }
+  locked.value = !locked.value;
+}
 </script>
 
 <template>
@@ -119,7 +146,7 @@ watch(
       <button class="btn btn-secondary" @click="resetAll" :disabled="locked">
         Сбросить выбор
       </button>
-      <button class="save-btn" @click="toggleLock">
+      <button class="save-btn" @click="handleSave">
         {{ actionButtonText }}
       </button>
     </div>

@@ -7,6 +7,7 @@ import InfluenceObjects from "@/components/threat-model-input/InfluenceObjects.v
 import RisksAndConsequences from "@/components/threat-model-input/RisksAndConsequences.vue";
 import ViolatorsInfo from "@/components/threat-model-input/ViolatorsInfo.vue";
 import ThreatsExecutionMethods from "@/components/threat-model-input/ThreatsExecutionMethods.vue";
+import ActualThreats from "@/components/threat-model-input/ActualThreats.vue";
 
 const steps = [
   "Общая информация",
@@ -33,6 +34,7 @@ const formData = ref({
   risksAndConsequences: [],
   attackersInfo: [],
   threatsExecution: [],
+  actualThreats: [],
 });
 
 const showErrorMessage = ref(false);
@@ -109,7 +111,10 @@ function prevStep() {
               <SystemsNetworksTable v-model="formData.systemData" />
             </div>
             <div v-else-if="currentStep === 2">
-              <InfluenceObjects v-model="formData.influenceObjects" />
+              <InfluenceObjects
+                v-model="formData.influenceObjects"
+                @update:actualThreats="formData.actualThreats = $event"
+              />
             </div>
             <div v-else-if="currentStep === 3">
               <RisksAndConsequences v-model="formData.risksAndConsequences" />
@@ -119,6 +124,9 @@ function prevStep() {
             </div>
             <div v-else-if="currentStep === 5">
               <ThreatsExecutionMethods v-model="formData.threatsExecution" />
+            </div>
+            <div v-else-if="currentStep === 6">
+              <ActualThreats v-model="formData.actualThreats" />
             </div>
           </div>
         </div>
