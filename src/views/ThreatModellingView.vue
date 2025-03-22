@@ -28,6 +28,12 @@ const formData = ref({
     category: "",
     significance: "",
     systemScale: "",
+    pdnCategory: "",
+    ownWorker: "",
+    subjectCount: "",
+    threatType: "",
+    kiiLevel: "",
+    kiiBranch: "",
   },
   systemData: [],
   influenceObjects: [],
@@ -38,17 +44,30 @@ const formData = ref({
 });
 
 const showErrorMessage = ref(false);
-
 const nextDisabled = ref(false);
 
 const isGeneralInfoValid = computed(() => {
   const info = formData.value.generalInformation;
-  return (
-    info.customerName.trim() !== "" &&
-    info.category.trim() !== "" &&
-    info.significance.trim() !== "" &&
-    info.systemScale.trim() !== ""
-  );
+
+  if (!info.customerName.trim() || !info.category.trim()) {
+    return false;
+  }
+
+  switch (info.category) {
+    case "ГИС":
+      return info.significance.trim() !== "" && info.systemScale.trim() !== "";
+    case "ИСПДН":
+      return (
+        info.pdnCategory.trim() !== "" &&
+        info.ownWorker.trim() !== "" &&
+        info.subjectCount.trim() !== "" &&
+        info.threatType.trim() !== ""
+      );
+    case "КИИ":
+      return info.kiiLevel.trim() !== "" && info.kiiBranch.trim() !== "";
+    default:
+      return false;
+  }
 });
 
 watch(isGeneralInfoValid, (newVal) => {
