@@ -143,7 +143,7 @@ function handleSave() {
     </div>
 
     <div class="d-flex justify-content-between">
-      <button class="btn btn-secondary" @click="resetAll" :disabled="locked">
+      <button class="btn btn-secondary" @click="resetAll">
         Сбросить выбор
       </button>
       <button class="save-btn" @click="handleSave">

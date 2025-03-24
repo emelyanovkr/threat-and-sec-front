@@ -8,6 +8,7 @@ import RisksAndConsequences from "@/components/threat-model-input/RisksAndConseq
 import ViolatorsInfo from "@/components/threat-model-input/ViolatorsInfo.vue";
 import ThreatsExecutionMethods from "@/components/threat-model-input/ThreatsExecutionMethods.vue";
 import ActualThreats from "@/components/threat-model-input/ActualThreats.vue";
+import TacticTechnic from "@/components/threat-model-input/TacticTechnic.vue";
 
 const steps = [
   "Общая информация",
@@ -17,6 +18,7 @@ const steps = [
   "Нарушители",
   "Способы реализации угроз",
   "Актуальные УБИ",
+  "Тактики и техники",
   "Генерация отчета",
 ];
 
@@ -41,6 +43,8 @@ const formData = ref({
   attackersInfo: [],
   threatsExecution: [],
   actualThreats: [],
+  tacticsAndTechniquesSelection: {},
+  tacticsData: [],
 });
 
 const showErrorMessage = ref(false);
@@ -145,7 +149,17 @@ function prevStep() {
               <ThreatsExecutionMethods v-model="formData.threatsExecution" />
             </div>
             <div v-else-if="currentStep === 6">
-              <ActualThreats v-model="formData.actualThreats" />
+              <ActualThreats
+                v-model="formData.actualThreats"
+                @update:tacticsAndTechniques="formData.tacticsData = $event"
+              />
+            </div>
+            <div v-else-if="currentStep === 7">
+              <TacticTechnic
+                v-model="formData.tacticsAndTechniquesSelection"
+                :threats="formData.actualThreats"
+                :tactics-data="formData.tacticsData"
+              />
             </div>
           </div>
         </div>
