@@ -35,7 +35,9 @@ const formData = ref({
     subjectCount: "",
     threatType: "",
     kiiLevel: "",
-    kiiBranch: "",
+    kiiSignificanceArea: "",
+    kiiCategoryPick: "",
+    kiiCategoryResult: "",
   },
   systemData: [],
   influenceObjects: [],
@@ -68,7 +70,11 @@ const isGeneralInfoValid = computed(() => {
         info.threatType.trim() !== ""
       );
     case "КИИ":
-      return info.kiiLevel.trim() !== "" && info.kiiBranch.trim() !== "";
+      return (
+        info.kiiLevel.trim() !== "" &&
+        info.kiiSignificanceArea.trim() !== "" &&
+        info.kiiCategoryPick.trim() !== ""
+      );
     default:
       return false;
   }
@@ -87,6 +93,36 @@ function nextStep() {
     nextDisabled.value = true;
     return;
   }
+
+  // Логирование значений для общей информации
+  const general = formData.value.generalInformation;
+  console.log("Selected category:", general.category);
+
+  switch (general.category) {
+    case "ГИС":
+      console.log("GIS Significance:", general.significance);
+      console.log("System Scale:", general.systemScale);
+      break;
+    case "ИСПДН":
+      console.log("PDN Category:", general.pdnCategory);
+      console.log("Own Worker:", general.ownWorker);
+      console.log("Subject Count:", general.subjectCount);
+      console.log("Threat Type:", general.threatType);
+      break;
+    case "КИИ":
+      console.log("KII Level:", general.kiiLevel);
+      // Для КИИ можно вывести выбранную значимость и выбранный пункт.
+      // Если в вашем компоненте GeneralInformation используется, например, поле kiiBranch (или kiiSignificanceArea),
+      // то выводим его значение:
+      console.log("Selected Significance (Branch):", general.kiiCategoryPick);
+      // Если у вас есть вычисляемое свойство, которое отображает выбранный пункт (например, romanCategory или selectedCategory),
+      // можно вывести и его:
+      // console.log("Selected Option:", romanCategory.value);
+      break;
+    default:
+      break;
+  }
+
   if (currentStep.value < steps.length - 1) {
     currentStep.value++;
   }
