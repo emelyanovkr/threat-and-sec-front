@@ -17,6 +17,8 @@ const props = defineProps({
       kiiSignificanceArea: "",
       kiiCategoryPick: "",
       kiiCategoryResult: "",
+      defensiveMeasures: [],
+      isConfirmed: false,
     }),
   },
 });
@@ -33,67 +35,73 @@ const dataModel = computed({
 });
 
 const categoryOptions = [
-  { value: "ГИС", label: "ГИС" },
-  { value: "ИСПДН", label: "ИСПДН" },
-  { value: "КИИ", label: "КИИ" },
+  { value: "GIS", label: "ГИС" },
+  { value: "ISPDN", label: "ИСПДН" },
+  { value: "KII", label: "КИИ" },
 ];
 
 // ГИС
 const gisSignificanceOptions = [
-  { value: "первый", label: "Первый уровень" },
-  { value: "второй", label: "Второй уровень" },
-  { value: "третий", label: "Третий уровень" },
+  { value: "FIRST", label: "Первый уровень" },
+  { value: "SECOND", label: "Второй уровень" },
+  { value: "THIRD", label: "Третий уровень" },
 ];
 
 const gisScaleOptions = [
-  { value: "федеральный", label: "Федеральный" },
-  { value: "региональный", label: "Региональный" },
-  { value: "объектовый", label: "Объектовый" },
+  { value: "FEDERAL", label: "Федеральный" },
+  { value: "REGIONAL", label: "Региональный" },
+  { value: "OBJECT", label: "Объектовый" },
 ];
 
 // ИСПДН
 const pdnCategoryOptions = [
-  { value: "специальные", label: "Специальные" },
-  { value: "биометрические", label: "Биометрические" },
-  { value: "иные", label: "Иные" },
-  { value: "общественные", label: "Общественные" },
+  { value: "SPECIAL", label: "Специальные" },
+  { value: "BIOMETRICAL", label: "Биометрические" },
+  { value: "OTHER", label: "Иные" },
+  { value: "SOCIAL", label: "Общественные" },
 ];
 
 const ownWorkerOptions = [
-  { value: "да", label: "Да" },
-  { value: "нет", label: "Нет" },
+  { value: "YES", label: "Да" },
+  { value: "NO", label: "Нет" },
+  { value: "NO_MATTER", label: "Не важно" },
 ];
 
 const subjectCountOptions = [
-  { value: "более100", label: "Более 100 тыс." },
-  { value: "менее100", label: "Менее 100 тыс." },
+  { value: "MORE100", label: "Более 100 тыс." },
+  { value: "LESS100", label: "Менее 100 тыс." },
+  { value: "ANY", label: "Любое" },
 ];
 
 const threatTypeOptions = [
-  { value: "1", label: "1 - минимальный набор угроз" },
-  { value: "2", label: "2 - расширенный набор угроз" },
-  { value: "3", label: "3 - сложные сценарии атак" },
+  { value: "FIRST", label: "1 - минимальный набор угроз" },
+  { value: "SECOND", label: "2 - расширенный набор угроз" },
+  { value: "THIRD", label: "3 - сложные сценарии атак" },
 ];
 
 // КИИ
 const kiiLevelOptions = [
-  { value: "уровень1", label: "Уровень 1" },
-  { value: "уровень2", label: "Уровень 2" },
-  { value: "уровень3", label: "Уровень 3" },
-  { value: "уровень4", label: "Уровень 4" },
-  { value: "уровень5", label: "Уровень 5" },
+  { value: "LEVEL1", label: "Уровень 1" },
+  { value: "LEVEL2", label: "Уровень 2" },
+  { value: "LEVEL3", label: "Уровень 3" },
+  { value: "LEVEL4", label: "Уровень 4" },
+  { value: "LEVEL5", label: "Уровень 5" },
 ];
 
 const kiiSignificanceOptions = [
-  { value: "social", label: "Социальная значимость" },
-  { value: "political", label: "Политическая значимость" },
-  { value: "economic", label: "Экономическая значимость" },
-  { value: "ecological", label: "Экологическая значимость" },
-  { value: "defense", label: "Значимость для обороны" },
+  { value: "SOCIAL", label: "Социальная значимость" },
+  { value: "POLITICAL", label: "Политическая значимость" },
+  { value: "ECONOMIC", label: "Экономическая значимость" },
+  { value: "ECOLOGICAL", label: "Экологическая значимость" },
+  {
+    value: "DEFENSE",
+    label:
+      "Значимость для обеспечения обороны страны, безопасности государства и правопорядка",
+  },
 ];
 
 const significanceTableData = {
-  social: [
+  SOCIAL: [
     {
       indicator: "Причинение ущерба жизни и здоровью людей (человек)",
       cat3: "более или равно 1, но менее или равно 50",
@@ -151,7 +159,7 @@ const significanceTableData = {
       cat1: "более 70",
     },
   ],
-  political: [
+  POLITICAL: [
     {
       indicator:
         "Прекращение или нарушение функционирования государственного органа в части невыполнения возложенной на него функции (полномочия)",
@@ -167,7 +175,7 @@ const significanceTableData = {
       cat1: "нарушение условиймежгосударственного договора (срыв переговоров или подписания)",
     },
   ],
-  economic: [
+  ECONOMIC: [
     {
       indicator:
         "Возникновение ущерба субъекту критической информационной инфраструктуры, который является государственной корпорацией, государственным унитарным предприятием, государственной компанией, организацией оборонно-промышленного комплекса, стратегическим акционерным обществом, стратегическим предприятием, оцениваемого в снижении уровня дохода (с учетом налога на добавленную стоимость, акцизов и иных обязательных платежей) по всем видам деятельности (процентов от годового объема доходов, усредненного за прошедший 5-летний период)",
@@ -225,7 +233,7 @@ const significanceTableData = {
       cat1: "более или равно 150",
     },
   ],
-  ecological: [
+  ECOLOGICAL: [
     {
       indicator:
         "Вредные воздействия на окружающую среду, оцениваемые: a) на территории, на которой окружающая среда может подвергнуться вредным воздействиям;",
@@ -241,7 +249,7 @@ const significanceTableData = {
       cat1: "более или равно 5000",
     },
   ],
-  defense: [
+  DEFENSE: [
     {
       indicator:
         "Прекращение или нарушение функционирования (невыполнение установленных показателей) пункта управления (ситуационного центра), оцениваемые в уровне (значимости) пункта управления или ситуационного центра",
@@ -319,11 +327,11 @@ const isFormValid = computed(() => {
   const dm = dataModel.value;
   if (!dm.customerName.trim()) return false;
   switch (dm.category) {
-    case "ГИС":
+    case "GIS":
       return dm.significance && dm.systemScale;
-    case "ИСПДН":
+    case "ISPDN":
       return dm.pdnCategory && dm.ownWorker && dm.subjectCount && dm.threatType;
-    case "КИИ":
+    case "KII":
       return dm.kiiLevel && dm.kiiSignificanceArea && dm.kiiCategoryPick;
     default:
       return false;
@@ -337,6 +345,71 @@ watch(
   },
   { immediate: true }
 );
+async function fetchDefensiveMeasures() {
+  let requestData = {};
+  const dm = dataModel.value;
+
+  if (dm.category === "GIS") {
+    requestData = {
+      systemCategory: dm.category,
+      gisScale: dm.systemScale,
+      gisSignificance: dm.significance,
+    };
+  } else if (dm.category === "ISPDN") {
+    requestData = {
+      systemCategory: dm.category,
+      pdCategory: dm.pdnCategory,
+      ownWorker: dm.ownWorker,
+      subjectCount: dm.subjectCount,
+      threatType: dm.threatType,
+    };
+  } else if (dm.category === "KII") {
+    requestData = {
+      systemCategory: dm.category,
+      kiiSecurityClass: parseInt(dataModel.value.kiiCategoryResult) || null,
+    };
+  }
+  console.log("Fetching defensive measures:", requestData);
+
+  try {
+    const response = await fetch("/api/defensive-measures", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    });
+    if (!response.ok) {
+      throw new Error("ERROR FETCHING DEFENSIVE MEASURES");
+    }
+
+    const measures = await response.json();
+    console.log("Fetched defensive measures: ", measures);
+    dm.defensiveMeasures = measures;
+  } catch (error) {
+    console.error("ERROR WHILE FETCHING DEFENSIVE MEASURES:", error);
+  }
+}
+
+async function confirmForm() {
+  if (!isFormValid.value) {
+    alert("Форма заполнена некорректно. Проверьте обязательные поля.");
+    return;
+  }
+
+  dataModel.value.isConfirmed = true;
+  await fetchDefensiveMeasures();
+}
+
+function removeDefensiveMeasure(id) {
+  dataModel.value.defensiveMeasures = dataModel.value.defensiveMeasures.filter(
+    (measure) => measure.id !== id
+  );
+}
+
+function unlockForm() {
+  dataModel.value.isConfirmed = false;
+}
 </script>
 
 <template>
@@ -367,13 +440,14 @@ watch(
         name="category"
         :value="cat.value"
         v-model="dataModel.category"
+        :disabled="dataModel.isConfirmed"
       />
       <label class="form-check-label" :for="'cat-' + cat.value">
         {{ cat.label }}
       </label>
     </div>
 
-    <div v-if="dataModel.category === 'ГИС'">
+    <div v-if="dataModel.category === 'GIS'">
       <h5 class="mt-3">ГИС</h5>
       <p class="mb-1">Уровень значимости:</p>
       <div
@@ -388,6 +462,7 @@ watch(
           name="gisSignificance"
           :value="opt.value"
           v-model="dataModel.significance"
+          :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'gisSignificance-' + opt.value">
           {{ opt.label }}
@@ -406,6 +481,7 @@ watch(
           name="gisScale"
           :value="opt.value"
           v-model="dataModel.systemScale"
+          :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'gisScale-' + opt.value">
           {{ opt.label }}
@@ -413,7 +489,7 @@ watch(
       </div>
     </div>
 
-    <div v-else-if="dataModel.category === 'ИСПДН'">
+    <div v-else-if="dataModel.category === 'ISPDN'">
       <h5 class="mt-3">ИСПДН</h5>
       <p class="mb-1">Категория ПДн:</p>
       <div
@@ -428,6 +504,7 @@ watch(
           name="pdnCategory"
           :value="opt.value"
           v-model="dataModel.pdnCategory"
+          :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'pdnCat-' + opt.value">
           {{ opt.label }}
@@ -446,6 +523,7 @@ watch(
           name="ownWorker"
           :value="opt.value"
           v-model="dataModel.ownWorker"
+          :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'ownWorker-' + opt.value">
           {{ opt.label }}
@@ -464,6 +542,7 @@ watch(
           name="subjectCount"
           :value="opt.value"
           v-model="dataModel.subjectCount"
+          :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'subjectCount-' + opt.value">
           {{ opt.label }}
@@ -482,6 +561,7 @@ watch(
           name="threatType"
           :value="opt.value"
           v-model="dataModel.threatType"
+          :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'threatType-' + opt.value">
           {{ opt.label }}
@@ -489,7 +569,7 @@ watch(
       </div>
     </div>
 
-    <div v-else-if="dataModel.category === 'КИИ'">
+    <div v-else-if="dataModel.category === 'KII'">
       <h5 class="mt-3">КИИ</h5>
       <p class="mb-1">Критический уровень:</p>
       <div
@@ -504,6 +584,7 @@ watch(
           name="kiiLevel"
           :value="opt.value"
           v-model="dataModel.kiiLevel"
+          :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'kiiLevel-' + opt.value">
           {{ opt.label }}
@@ -522,6 +603,7 @@ watch(
           name="kiiSignificanceArea"
           :value="opt.value"
           v-model="dataModel.kiiSignificanceArea"
+          :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'kiiArea-' + opt.value">
           {{ opt.label }}
@@ -551,6 +633,7 @@ watch(
                     name="kiiCategoryPick"
                     :value="rowIndex + '-3'"
                     v-model="dataModel.kiiCategoryPick"
+                    :disabled="dataModel.isConfirmed"
                   />
                   {{ row.cat3 }}
                 </label>
@@ -563,6 +646,7 @@ watch(
                     name="kiiCategoryPick"
                     :value="rowIndex + '-2'"
                     v-model="dataModel.kiiCategoryPick"
+                    :disabled="dataModel.isConfirmed"
                   />
                   {{ row.cat2 }}
                 </label>
@@ -575,6 +659,7 @@ watch(
                     name="kiiCategoryPick"
                     :value="rowIndex + '-1'"
                     v-model="dataModel.kiiCategoryPick"
+                    :disabled="dataModel.isConfirmed"
                   />
                   {{ row.cat1 }}
                 </label>
@@ -588,12 +673,48 @@ watch(
         <span class="ms-1">{{ romanCategory }}</span>
       </div>
     </div>
+
+    <div class="mt-3">
+      <button
+        class="confirm-btn"
+        @click="dataModel.isConfirmed ? unlockForm() : confirmForm()"
+      >
+        {{ dataModel.isConfirmed ? "Редактировать" : "Подтвердить" }}
+      </button>
+    </div>
+
+    <div v-if="dataModel.defensiveMeasures.length" class="mt-4">
+      <h4>Базовые меры защиты</h4>
+      <div
+        v-for="measure in dataModel.defensiveMeasures"
+        :key="measure.id"
+        class="card mb-2"
+      >
+        <div class="defensive-card">
+          <h5 class="mb-0">{{ measure.key }}</h5>
+        </div>
+        <div class="card-body">
+          {{ measure.name }}
+          <div class="text-end">
+            <button
+              class="delete-btn"
+              @click="removeDefensiveMeasure(measure.id)"
+            >
+              Удалить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+@import "bootstrap";
+
 .form-control {
   border-color: #c80036;
+
   &:focus {
     border-color: #a11919;
     box-shadow: none;
@@ -608,5 +729,47 @@ watch(
 .form-check-input[type="radio"]:focus {
   outline: none;
   box-shadow: 0 0 0 0.2rem rgba(161, 25, 25, 0.25);
+}
+
+.btn-main-style {
+  @extend .btn;
+
+  border-radius: 0.25rem;
+  border-color: #a11919;
+  background-color: #a11919;
+
+  &:active {
+    color: #ffffff !important;
+    background-color: #a11919 !important;
+    border-color: #a11919 !important;
+  }
+
+  &:hover {
+    color: #a11919;
+    border-color: #a11919;
+    background-color: #ffffff;
+  }
+}
+
+.confirm-btn {
+  @extend .btn-primary;
+  @extend .btn-main-style;
+}
+
+.defensive-card {
+  @extend .card-header;
+  @extend .d-flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background-color: rgba(1, 85, 81, 0.9);
+  color: #fdfbee;
+}
+
+.delete-btn {
+  @extend .btn-sm;
+  @extend .btn-danger;
+
+  @extend .btn-main-style;
 }
 </style>

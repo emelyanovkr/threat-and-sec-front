@@ -38,6 +38,8 @@ const formData = ref({
     kiiSignificanceArea: "",
     kiiCategoryPick: "",
     kiiCategoryResult: "",
+    defensiveMeasures: [],
+    isConfirmed: false,
   },
   systemData: [],
   influenceObjects: [],
@@ -60,16 +62,16 @@ const isGeneralInfoValid = computed(() => {
   }
 
   switch (info.category) {
-    case "ГИС":
+    case "GIS":
       return info.significance.trim() !== "" && info.systemScale.trim() !== "";
-    case "ИСПДН":
+    case "ISPDN":
       return (
         info.pdnCategory.trim() !== "" &&
         info.ownWorker.trim() !== "" &&
         info.subjectCount.trim() !== "" &&
         info.threatType.trim() !== ""
       );
-    case "КИИ":
+    case "KII":
       return (
         info.kiiLevel.trim() !== "" &&
         info.kiiSignificanceArea.trim() !== "" &&
@@ -93,8 +95,6 @@ function nextStep() {
     nextDisabled.value = true;
     return;
   }
-
-  // Логирование значений для общей информации
   const general = formData.value.generalInformation;
   console.log("Selected category:", general.category);
 
@@ -111,13 +111,7 @@ function nextStep() {
       break;
     case "КИИ":
       console.log("KII Level:", general.kiiLevel);
-      // Для КИИ можно вывести выбранную значимость и выбранный пункт.
-      // Если в вашем компоненте GeneralInformation используется, например, поле kiiBranch (или kiiSignificanceArea),
-      // то выводим его значение:
       console.log("Selected Significance (Branch):", general.kiiCategoryPick);
-      // Если у вас есть вычисляемое свойство, которое отображает выбранный пункт (например, romanCategory или selectedCategory),
-      // можно вывести и его:
-      // console.log("Selected Option:", romanCategory.value);
       break;
     default:
       break;
