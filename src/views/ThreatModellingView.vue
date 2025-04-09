@@ -39,6 +39,7 @@ const formData = ref({
     kiiCategoryPick: "",
     kiiCategoryResult: "",
     defensiveMeasures: [],
+    securityTools: [],
     isConfirmed: false,
   },
   systemData: [],

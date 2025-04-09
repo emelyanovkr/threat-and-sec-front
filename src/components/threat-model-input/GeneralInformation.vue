@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineProps, defineEmits, watch } from "vue";
+import { computed, defineProps, defineEmits, watch, ref } from "vue";
 
 const props = defineProps({
   modelValue: {
@@ -18,6 +18,7 @@ const props = defineProps({
       kiiCategoryPick: "",
       kiiCategoryResult: "",
       defensiveMeasures: [],
+      securityTools: [],
       isConfirmed: false,
     }),
   },
@@ -410,6 +411,44 @@ function removeDefensiveMeasure(id) {
 function unlockForm() {
   dataModel.value.isConfirmed = false;
 }
+
+const showDetailsModal = ref(false);
+const detailsDescription = ref("");
+const detailsKey = ref("");
+
+function openDetails(measure) {
+  detailsKey.value = measure.key;
+  detailsDescription.value = measure.description;
+  showDetailsModal.value = true;
+}
+
+function closeDetails() {
+  showDetailsModal.value = false;
+}
+
+async function fetchSecurityTools() {
+  const ids = dataModel.value.defensiveMeasures.map((measure) => measure.id);
+  console.log("Requesting security tools for ids:", ids);
+
+  try {
+    const response = await fetch("/api/security-tools", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(ids),
+    });
+
+    if (!response.ok) {
+      throw new Error("ERROR FETCHING SECURITY TOOLS");
+    }
+
+    dataModel.value.securityTools = await response.json();
+    console.log("Received security tools:", dataModel.value.securityTools);
+  } catch (error) {
+    console.error("ERROR FETCHING SECURITY TOOLS:", error);
+  }
+}
 </script>
 
 <template>
@@ -696,12 +735,82 @@ function unlockForm() {
         <div class="card-body">
           {{ measure.name }}
           <div class="text-end">
+            <button class="details-btn me-2" @click="openDetails(measure)">
+              Детали
+            </button>
             <button
               class="delete-btn"
               @click="removeDefensiveMeasure(measure.id)"
             >
               Удалить
             </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2">
+        <button class="confirm-defensive-btn" @click="fetchSecurityTools">
+          Подтвердить средства защиты
+        </button>
+      </div>
+
+      <div v-if="dataModel.securityTools.length" class="mt-2">
+        <h4>Средства защиты по адаптированным мерам</h4>
+        <div
+          v-for="toolGroup in dataModel.securityTools"
+          :key="toolGroup.key.id"
+          class="card mb-2"
+        >
+          <div class="defensive-card">
+            <strong>{{ toolGroup.key.key }}</strong>
+            <small class="d-block">{{ toolGroup.key.name }}</small>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li v-for="tool in toolGroup.value" :key="tool.id">
+                {{ tool.name }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    v-if="showDetailsModal"
+    style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1040;
+    "
+  >
+    <div
+      class="modal-backdrop show"
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+    ></div>
+    <div
+      class="modal show"
+      style="display: block; position: fixed; z-index: 1050"
+      tabindex="-1"
+      role="dialog"
+    >
+      <div class="modal-dialog" role="document" style="max-width: 85%">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ detailsKey }}</h5>
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="Close"
+              @click="closeDetails"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>{{ detailsDescription }}</p>
           </div>
         </div>
       </div>
@@ -737,6 +846,7 @@ function unlockForm() {
   border-radius: 0.25rem;
   border-color: #a11919;
   background-color: #a11919;
+  color: white;
 
   &:active {
     color: #ffffff !important;
@@ -760,10 +870,17 @@ function unlockForm() {
   @extend .card-header;
   @extend .d-flex;
   align-items: center;
+  text-align: end;
   justify-content: space-between;
 
   background-color: rgba(1, 85, 81, 0.9);
+  border-color: rgba(1, 85, 81, 1);
   color: #fdfbee;
+}
+
+.details-btn {
+  @extend .btn-sm;
+  @extend .btn-main-style;
 }
 
 .delete-btn {
@@ -771,5 +888,25 @@ function unlockForm() {
   @extend .btn-danger;
 
   @extend .btn-main-style;
+}
+
+.confirm-defensive-btn {
+  @extend .btn;
+
+  color: white;
+  background-color: rgba(1, 85, 81, 0.9);
+  border-color: rgba(1, 85, 81, 0.9);
+
+  &:active {
+    color: #ffffff !important;
+    background-color: rgba(1, 85, 81, 0.9) !important;
+    border-color: rgba(1, 85, 81, 0.9) !important;
+  }
+
+  &:hover {
+    color: rgba(1, 85, 81, 0.9);
+    border-color: rgba(1, 85, 81, 0.9);
+    background-color: #ffffff;
+  }
 }
 </style>
