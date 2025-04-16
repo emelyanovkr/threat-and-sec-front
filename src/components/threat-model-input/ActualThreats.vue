@@ -48,7 +48,7 @@ const actionButtonText = computed(() =>
 
 async function fetchTacticsAndTechniques() {
   try {
-    const response = await fetch("/api/fetch-tactics", {
+    const response = await fetch("/api/tactics-techniques", {
       method: "GET",
     });
     if (!response.ok) {

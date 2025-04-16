@@ -1,110 +1,62 @@
 <script setup>
-import { ref, computed, watch, defineProps, defineEmits } from "vue";
+import { computed, defineProps, onMounted, inject } from "vue";
 
-const defaultRiskCategories = [
-  {
-    id: "U1",
-    label: "У1: Ущерб физическому лицу",
-    selected: false,
-    consequences: [
-      { text: "Угроза жизни или здоровью", checked: false },
-      { text: "Унижение достоинства личности", checked: false },
-      { text: "Нарушение свободы, личной неприкосновенности", checked: false },
-      { text: "Нарушение неприкосновенности частной жизни", checked: false },
-      {
-        text: "Нарушение личной, семейной тайны, утрата чести и доброго имени",
-        checked: false,
-      },
-      {
-        text: "Нарушение тайны переписки, телефонных переговоров, иных сообщений",
-        checked: false,
-      },
-      { text: "Нарушение прав и свобод гражданина", checked: false },
-      { text: "Финансовый, иной материальный ущерб", checked: false },
-      {
-        text: "«Травля» в сети, разглашение персональных данных",
-        checked: false,
-      },
-    ],
-  },
-  {
-    id: "U2",
-    label: "У2: Риски юридическому лицу, ИП, хозяйственной деятельности",
-    selected: false,
-    consequences: [
-      { text: "Нарушение законодательства РФ", checked: false },
-      { text: "Потеря (хищение) денежных средств", checked: false },
-      { text: "Недополучение прибыли", checked: false },
-      {
-        text: "Незапланированные затраты (штрафы, компенсации)",
-        checked: false,
-      },
-      { text: "Нарушение штатного режима функционирования", checked: false },
-      { text: "Нарушение планируемых сделок и соглашений", checked: false },
-      { text: "Потеря конкурентного преимущества", checked: false },
-      { text: "Утрата доверия", checked: false },
-      { text: "Имущественный ущерб", checked: false },
-      { text: "Утрата репутации", checked: false },
-      { text: "Дискредитация бренда", checked: false },
-      { text: "Ограничение доступа к web-ресурсам", checked: false },
-      { text: "Выведение из строя web-ресурса", checked: false },
-      { text: "Неправомерное копирование ПО", checked: false },
-      { text: "Утечка конфиденциальной информации", checked: false },
-    ],
-  },
-  {
-    id: "U3",
-    label: "У3: Ущерб государству (оборона, безопасность и пр.)",
-    selected: false,
-    consequences: [
-      { text: "Причинение ущерба жизни и здоровью людей", checked: false },
-      {
-        text: "Нарушение функционирования объектов жизнеобеспечения",
-        checked: false,
-      },
-      { text: "Нарушение транспортной инфраструктуры", checked: false },
-      { text: "Нарушение функционирования госорганов", checked: false },
-      { text: "Нарушение работы сети связи", checked: false },
-      { text: "Нарушение международных договоров РФ", checked: false },
-      { text: "Прекращение деятельности организаций", checked: false },
-      { text: "Нарушение межгосударственного сотрудничества", checked: false },
-      { text: "Ущерб экономике государства", checked: false },
-      { text: "Раскрытие государственной тайны", checked: false },
-      { text: "Нарушение безопасности государства", checked: false },
-      { text: "Утечка конфиденциальной информации", checked: false },
-    ],
-  },
-];
-
-const props = defineProps({
+defineProps({
   modelValue: {
-    type: Array,
-    default: () => [],
+    type: Object,
+    default: () => ({
+      riskData: [],
+      isRiskDataLoaded: false,
+    }),
   },
 });
-const emit = defineEmits(["update:modelValue"]);
 
-const riskData = ref(
-  props.modelValue.length ? props.modelValue : defaultRiskCategories
-);
+const formData = inject("formData");
 
-watch(
-  riskData,
-  (newValue) => {
-    emit("update:modelValue", newValue);
+const riskData = computed({
+  get: () => formData.value.risksAndConsequences.riskData,
+  set: (val) => {
+    formData.value.risksAndConsequences.riskData = val;
   },
-  { deep: true }
-);
+});
 
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    if (newValue.length) {
-      riskData.value = newValue;
+const isRiskDataLoaded = computed({
+  get: () => formData.value.risksAndConsequences.isRiskDataLoaded,
+  set: (val) => {
+    formData.value.risksAndConsequences.isRiskDataLoaded = val;
+  },
+});
+
+const fetchRisksAndConsequences = async () => {
+  if (!isRiskDataLoaded.value) {
+    try {
+      const url = `/api/risks-consequences?systemCategory=${formData.value.generalInformation.category}`;
+      const response = await fetch(url, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error("Error fetching risks and consequences");
+      }
+      const data = await response.json();
+      riskData.value = data.map((risk) => ({
+        id: risk.id,
+        label: risk.riskName,
+        selected: false,
+        consequences: risk.consequences.map((consequence) => ({
+          text: consequence.title,
+          checked: false,
+        })),
+      }));
+      isRiskDataLoaded.value = true;
+    } catch (error) {
+      console.error("Error:", error);
     }
-  },
-  { deep: true }
-);
+  }
+};
+
+onMounted(() => {
+  fetchRisksAndConsequences();
+});
 
 const selectedRiskCategories = computed(() => {
   return riskData.value.filter((risk) => risk.selected);
@@ -123,9 +75,9 @@ const selectedRiskCategories = computed(() => {
             :id="risk.id"
             v-model="risk.selected"
           />
-          <label class="form-check-label" :for="risk.id">{{
-            risk.label
-          }}</label>
+          <label class="form-check-label" :for="risk.id"
+            >У{{ risk.id }}: {{ risk.label }}</label
+          >
         </div>
       </div>
     </div>
@@ -135,7 +87,7 @@ const selectedRiskCategories = computed(() => {
         :key="risk.id + '-consequences'"
         class="consequences-item"
       >
-        <h5>{{ risk.label }}: Негативные последствия</h5>
+        <h5>У{{ risk.id }}: {{ risk.label }}: Негативные последствия</h5>
         <div
           v-for="(consequence, cIndex) in risk.consequences"
           :key="risk.id + '-' + cIndex"

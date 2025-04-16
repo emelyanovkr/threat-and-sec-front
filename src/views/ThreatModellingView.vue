@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, provide, ref, watch } from "vue";
 import StepIndicator from "@/components/StepIndicator.vue";
 import SystemsNetworksTable from "@/components/threat-model-input/SystemsNetworksTable.vue";
 import GeneralInformation from "@/components/threat-model-input/GeneralInformation.vue";
@@ -44,13 +44,18 @@ const formData = ref({
   },
   systemData: [],
   influenceObjects: [],
-  risksAndConsequences: [],
+  risksAndConsequences: {
+    riskData: [],
+    isRiskDataLoaded: false,
+  },
   attackersInfo: [],
   threatsExecution: [],
   actualThreats: [],
   tacticsAndTechniquesSelection: {},
   tacticsData: [],
 });
+
+provide("formData", formData);
 
 const showErrorMessage = ref(false);
 const nextDisabled = ref(false);

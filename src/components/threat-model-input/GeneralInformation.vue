@@ -55,26 +55,24 @@ const gisScaleOptions = [
 ];
 
 // ИСПДН
-const pdnCategoryOptions = [
+const ispdnCategoryOptions = [
   { value: "SPECIAL", label: "Специальные" },
   { value: "BIOMETRICAL", label: "Биометрические" },
   { value: "OTHER", label: "Иные" },
   { value: "SOCIAL", label: "Общественные" },
 ];
 
-const ownWorkerOptions = [
+const ispdnOwnWorkerOptions = [
   { value: "YES", label: "Да" },
   { value: "NO", label: "Нет" },
-  { value: "NO_MATTER", label: "Не важно" },
 ];
 
-const subjectCountOptions = [
+const ispdnSubjectCountOptions = [
   { value: "MORE100", label: "Более 100 тыс." },
   { value: "LESS100", label: "Менее 100 тыс." },
-  { value: "ANY", label: "Любое" },
 ];
 
-const threatTypeOptions = [
+const ispdnThreatTypeOptions = [
   { value: "FIRST", label: "1 - минимальный набор угроз" },
   { value: "SECOND", label: "2 - расширенный набор угроз" },
   { value: "THIRD", label: "3 - сложные сценарии атак" },
@@ -465,6 +463,7 @@ async function fetchSecurityTools() {
       />
       <label for="customerName">Название компании (заказчика)</label>
     </div>
+    <div class="form-text mb-1">Например, ООО "Гарант" или ИП Иванов И. И.</div>
 
     <h4>Категория объекта</h4>
     <div
@@ -532,7 +531,7 @@ async function fetchSecurityTools() {
       <h5 class="mt-3">ИСПДН</h5>
       <p class="mb-1">Категория ПДн:</p>
       <div
-        v-for="opt in pdnCategoryOptions"
+        v-for="opt in ispdnCategoryOptions"
         :key="opt.value"
         class="form-check mb-1"
       >
@@ -551,7 +550,7 @@ async function fetchSecurityTools() {
       </div>
       <p class="mb-1 mt-3">Собственный работник?</p>
       <div
-        v-for="opt in ownWorkerOptions"
+        v-for="opt in ispdnOwnWorkerOptions"
         :key="opt.value"
         class="form-check mb-1"
       >
@@ -570,7 +569,7 @@ async function fetchSecurityTools() {
       </div>
       <p class="mb-1 mt-3">Количество субъектов:</p>
       <div
-        v-for="opt in subjectCountOptions"
+        v-for="opt in ispdnSubjectCountOptions"
         :key="opt.value"
         class="form-check mb-1"
       >
@@ -589,7 +588,7 @@ async function fetchSecurityTools() {
       </div>
       <p class="mb-1 mt-3">Тип актуальных угроз:</p>
       <div
-        v-for="opt in threatTypeOptions"
+        v-for="opt in ispdnThreatTypeOptions"
         :key="opt.value"
         class="form-check mb-1"
       >
