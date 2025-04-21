@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineProps, onMounted, inject } from "vue";
+import { computed, defineProps, onMounted, inject, watch } from "vue";
 
 defineProps({
   modelValue: {
@@ -30,7 +30,7 @@ const isRiskDataLoaded = computed({
 const fetchRisksAndConsequences = async () => {
   if (!isRiskDataLoaded.value) {
     try {
-      const url = `/api/risks-consequences?systemCategory=${formData.value.generalInformation.category}`;
+      const url = `/api/risks-consequences?systemCategory=${formData.value.generalInformation.category.value}`;
       const response = await fetch(url, {
         method: "GET",
       });
@@ -41,8 +41,10 @@ const fetchRisksAndConsequences = async () => {
       riskData.value = data.map((risk) => ({
         id: risk.id,
         label: risk.riskName,
+        code: risk.riskCode,
         selected: false,
         consequences: risk.consequences.map((consequence) => ({
+          id: consequence.id,
           text: consequence.title,
           checked: false,
         })),
@@ -61,6 +63,8 @@ onMounted(() => {
 const selectedRiskCategories = computed(() => {
   return riskData.value.filter((risk) => risk.selected);
 });
+
+watch(riskData, () => {}, { deep: true });
 </script>
 
 <template>
@@ -76,7 +80,7 @@ const selectedRiskCategories = computed(() => {
             v-model="risk.selected"
           />
           <label class="form-check-label" :for="risk.id"
-            >У{{ risk.id }}: {{ risk.label }}</label
+            >{{ risk.code }}: {{ risk.label }}</label
           >
         </div>
       </div>
@@ -87,7 +91,7 @@ const selectedRiskCategories = computed(() => {
         :key="risk.id + '-consequences'"
         class="consequences-item"
       >
-        <h5>У{{ risk.id }}: {{ risk.label }}: Негативные последствия</h5>
+        <h5>{{ risk.code }}: {{ risk.label }}: Негативные последствия</h5>
         <div
           v-for="(consequence, cIndex) in risk.consequences"
           :key="risk.id + '-' + cIndex"

@@ -1,21 +1,13 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch, onMounted, defineProps, defineEmits } from "vue";
 
-const intruders = ref([
-  "Специальные службы иностранных государств",
-  "Террористические, экстремистские группировки",
-  "Преступные группы (криминальные структуры)",
-  "Отдельные физические лица (хакеры)",
-  "Конкурирующие организации",
-  "Разработчики программных, программно-аппаратных средств",
-  "Лица, обеспечивающие поставку программных, программно-аппаратных средств",
-  "Поставщики услуг связи, вычислительных услуг",
-  "Лица, привлекаемые для установки, настройки, испытаний",
-  "Лица, обеспечивающие функционирование систем и сетей оператора",
-  "Авторизованные пользователи систем и сетей",
-  "Системные администраторы и администраторы безопасности",
-  "Бывшие (уволенные) работники (пользователи)",
-]);
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    required: true,
+  },
+});
+const emit = defineEmits(["update:modelValue"]);
 
 const categories = [
   { id: "external", label: "Внешний" },
@@ -24,103 +16,117 @@ const categories = [
 ];
 
 const sources = [
-  { id: "N1", label: "Н1", title: "Нарушитель с базовыми возможностями" },
+  { id: "N1", label: "Н1", title: "нарушитель с базовыми возможностями" },
   {
     id: "N2",
     label: "Н2",
-    title: "Нарушитель с базовыми повышенными возможностями",
+    title: "нарушитель с повыш. базовыми возможностями",
   },
-  { id: "N3", label: "Н3", title: "Нарушитель со средними возможностями" },
-  { id: "N4", label: "Н4", title: "Нарушитель с высокими возможностями" },
+  { id: "N3", label: "Н3", title: "нарушитель со средними возможностями" },
+  { id: "N4", label: "Н4", title: "нарушитель с высокими возможностями" },
 ];
 
-const selection = ref({});
+const offenders = ref(props.modelValue.offenders);
+const selection = ref([]);
 
-function selectCategory(intruderIndex, categoryId) {
-  if (!selection.value[intruderIndex]) {
-    selection.value[intruderIndex] = {};
-  }
-  selection.value[intruderIndex].categoryId = categoryId;
-}
+onMounted(async () => {
+  // Загружаем нарушителей только один раз
+  if (!props.modelValue.isOffendersLoaded) {
+    try {
+      const resp = await fetch("/api/offenders");
+      if (!resp.ok) throw new Error("Ошибка загрузки нарушителей");
+      offenders.value = await resp.json();
 
-function selectSource(intruderIndex, sourceId) {
-  if (!selection.value[intruderIndex]) {
-    selection.value[intruderIndex] = {};
+      emit("update:modelValue", {
+        ...props.modelValue,
+        offenders: offenders.value,
+        isOffendersLoaded: true,
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
-  selection.value[intruderIndex].sourceId = sourceId;
-}
+
+  selection.value = offenders.value.map((off) => {
+    const saved = props.modelValue.offendersInfo.find((i) => i.id === off.id);
+    return saved ? saved.categoryId || saved.sourceId || null : null;
+  });
+});
+
+watch(
+  selection,
+  (newSel) => {
+    const attackersInfo = offenders.value.map((off, idx) => {
+      const choice = newSel[idx];
+      return {
+        id: off.id,
+        name: off.name,
+        categoryId: categories.some((c) => c.id === choice) ? choice : null,
+        sourceId: sources.some((s) => s.id === choice) ? choice : null,
+      };
+    });
+
+    emit("update:modelValue", {
+      ...props.modelValue,
+      offendersInfo: attackersInfo,
+    });
+  },
+  { deep: true }
+);
 </script>
 
 <template>
   <h3 class="mb-0">Нарушители</h3>
+
   <div class="intruders-table-container">
     <table class="table align-middle">
       <thead>
         <tr>
-          <th rowspan="2" class="text-center align-middle"></th>
-          <th :colspan="categories.length" class="text-center"></th>
-          <th class="gap-cell"></th>
-          <th :colspan="sources.length" class="text-center"></th>
-        </tr>
-        <tr>
-          <th
-            v-for="cat in categories"
-            :key="cat.id + '-header'"
-            class="text-center"
-          >
+          <th></th>
+          <th v-for="cat in categories" :key="cat.id" class="text-center">
             {{ cat.label }}
           </th>
           <th class="gap-cell"></th>
-          <th
-            v-for="src in sources"
-            :key="src.id + '-header'"
-            class="text-center"
-          >
-            <span :title="src.title">
-              {{ src.label }}
-            </span>
+          <th v-for="src in sources" :key="src.id" class="text-center">
+            {{ src.label }}
           </th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="(intruder, i) in intruders" :key="i">
-          <td>{{ intruder }}</td>
+        <tr v-for="(off, i) in offenders" :key="off.id">
+          <td>{{ off.name }}</td>
 
+          <!-- категории -->
           <td
             v-for="cat in categories"
             :key="cat.id + '-' + i"
             class="text-center"
           >
-            <div class="form-check d-flex justify-content-center">
-              <input
-                class="form-check-input"
-                type="radio"
-                :name="'category-' + i"
-                :value="cat.id"
-                :checked="selection[i] && selection[i].categoryId === cat.id"
-                @change="selectCategory(i, cat.id)"
-              />
-            </div>
+            <input
+              class="form-check-input"
+              type="radio"
+              :name="'intruder-' + i"
+              :value="cat.id"
+              v-model="selection[i]"
+            />
           </td>
 
           <td class="gap-cell"></td>
 
+          <!-- источники -->
           <td
             v-for="src in sources"
             :key="src.id + '-' + i"
             class="text-center"
           >
-            <div class="form-check d-flex justify-content-center">
-              <input
-                class="form-check-input"
-                type="radio"
-                :name="'source-' + i"
-                :value="src.id"
-                :checked="selection[i] && selection[i].sourceId === src.id"
-                @change="selectSource(i, src.id)"
-              />
-            </div>
+            <input
+              class="form-check-input"
+              type="radio"
+              :name="'intruder-' + i"
+              :value="src.id"
+              v-model="selection[i]"
+            />
           </td>
         </tr>
       </tbody>
@@ -133,21 +139,17 @@ table {
   border-collapse: separate;
   border-spacing: 0;
 }
-
 th,
 td {
   border: none !important;
 }
-
 .gap-cell {
   width: 20px;
 }
-
 .form-check-input[type="radio"]:checked {
   background-color: #a11919;
   border-color: #a11919;
 }
-
 .form-check-input[type="radio"]:focus {
   outline: none;
   box-shadow: 0 0 0 0.2rem rgba(161, 25, 25, 0.25);

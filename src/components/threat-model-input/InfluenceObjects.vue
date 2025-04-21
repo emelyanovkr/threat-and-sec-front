@@ -67,7 +67,7 @@ watch(
   { deep: true }
 );
 
-async function saveImpactObjects() {
+async function fetchRelevantThreats() {
   const selectedObjects = items.value
     .filter((item) => item.applies)
     .map((item) => item.label);
@@ -93,7 +93,7 @@ async function saveImpactObjects() {
 
 function handleSave() {
   if (!locked.value) {
-    saveImpactObjects();
+    fetchRelevantThreats();
   }
   locked.value = !locked.value;
 }

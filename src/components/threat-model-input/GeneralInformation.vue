@@ -5,18 +5,18 @@ const props = defineProps({
   modelValue: {
     type: Object,
     default: () => ({
-      customerName: "",
-      category: "",
-      significance: "",
-      systemScale: "",
-      pdnCategory: "",
-      ownWorker: "",
-      subjectCount: "",
-      threatType: "",
-      kiiLevel: "",
-      kiiSignificanceArea: "",
-      kiiCategoryPick: "",
-      kiiCategoryResult: "",
+      customerName: { value: "", label: "" },
+      category: { value: "", label: "" },
+      significance: { value: "", label: "" },
+      systemScale: { value: "", label: "" },
+      pdnCategory: { value: "", label: "" },
+      ownWorker: { value: "", label: "" },
+      subjectCount: { value: "", label: "" },
+      threatType: { value: "", label: "" },
+      kiiLevel: { value: "", label: "" },
+      kiiSignificanceArea: { value: "", label: "" },
+      kiiCategoryPick: { value: "", label: "" },
+      kiiCategoryResult: { value: "", label: "" },
       defensiveMeasures: [],
       securityTools: [],
       isConfirmed: false,
@@ -99,7 +99,7 @@ const kiiSignificanceOptions = [
   },
 ];
 
-const significanceTableData = {
+const kiiSignificanceTableData = {
   SOCIAL: [
     {
       indicator: "Причинение ущерба жизни и здоровью людей (человек)",
@@ -281,20 +281,38 @@ const significanceTableData = {
 };
 
 const currentSignificanceRows = computed(() => {
-  const area = dataModel.value.kiiSignificanceArea;
+  const area = dataModel.value.kiiSignificanceArea.value;
   if (!area) return [];
-  return significanceTableData[area] || [];
+  return kiiSignificanceTableData[area] || [];
 });
 
 watch(
   () => dataModel.value.kiiCategoryPick,
-  (newVal) => {
-    if (!newVal) {
-      dataModel.value.kiiCategoryResult = "";
+  (newPick) => {
+    const raw = typeof newPick === "object" ? newPick.value : newPick;
+    if (!raw) {
+      dataModel.value.kiiCategoryResult = { value: "", label: "" };
       return;
     }
-    const [, cat] = newVal.split("-");
-    dataModel.value.kiiCategoryResult = cat;
+    const [, cat] = raw.split("-");
+
+    let label;
+    switch (cat) {
+      case "1":
+        label = "I"; // Римская цифра
+        break;
+      case "2":
+        label = "II"; // Римская цифра
+        break;
+      case "3":
+        label = "III"; // Римская цифра
+        break;
+      default:
+        label = ""; // Если ничего не выбрано
+        break;
+    }
+
+    dataModel.value.kiiCategoryResult = { value: cat, label: label };
   },
   { immediate: true }
 );
@@ -310,7 +328,7 @@ watch(
 );
 
 const romanCategory = computed(() => {
-  switch (dataModel.value.kiiCategoryResult) {
+  switch (dataModel.value.kiiCategoryResult.value) {
     case "3":
       return "III";
     case "2":
@@ -324,14 +342,25 @@ const romanCategory = computed(() => {
 
 const isFormValid = computed(() => {
   const dm = dataModel.value;
-  if (!dm.customerName.trim()) return false;
-  switch (dm.category) {
+  if (!dm.customerName || !dm.customerName.value.trim()) return false;
+  switch (dm.category.value) {
     case "GIS":
-      return dm.significance && dm.systemScale;
+      return dm.significance.value && dm.systemScale.value;
     case "ISPDN":
-      return dm.pdnCategory && dm.ownWorker && dm.subjectCount && dm.threatType;
+      return (
+        dm.pdnCategory.value &&
+        dm.ownWorker.value &&
+        dm.subjectCount.value &&
+        dm.threatType.value
+      );
     case "KII":
-      return dm.kiiLevel && dm.kiiSignificanceArea && dm.kiiCategoryPick;
+      return (
+        dm.kiiLevel.value &&
+        dm.kiiSignificanceArea.value &&
+        (typeof dm.kiiCategoryPick === "object"
+          ? dm.kiiCategoryPick.value
+          : dm.kiiCategoryPick)
+      );
     default:
       return false;
   }
@@ -348,24 +377,25 @@ async function fetchDefensiveMeasures() {
   let requestData = {};
   const dm = dataModel.value;
 
-  if (dm.category === "GIS") {
+  if (dm.category.value === "GIS") {
     requestData = {
-      systemCategory: dm.category,
-      gisScale: dm.systemScale,
-      gisSignificance: dm.significance,
+      systemCategory: dm.category.value,
+      gisScale: dm.systemScale.value,
+      gisSignificance: dm.significance.value,
     };
-  } else if (dm.category === "ISPDN") {
+  } else if (dm.category.value === "ISPDN") {
     requestData = {
-      systemCategory: dm.category,
-      pdCategory: dm.pdnCategory,
-      ownWorker: dm.ownWorker,
-      subjectCount: dm.subjectCount,
-      threatType: dm.threatType,
+      systemCategory: dm.category.value,
+      pdCategory: dm.pdnCategory.value,
+      ownWorker: dm.ownWorker.value,
+      subjectCount: dm.subjectCount.value,
+      threatType: dm.threatType.value,
     };
-  } else if (dm.category === "KII") {
+  } else if (dm.category.value === "KII") {
     requestData = {
-      systemCategory: dm.category,
-      kiiSecurityClass: parseInt(dataModel.value.kiiCategoryResult) || null,
+      systemCategory: dm.category.value,
+      kiiSecurityClass:
+        parseInt(dataModel.value.kiiCategoryResult.value) || null,
     };
   }
   console.log("Fetching defensive measures:", requestData);
@@ -447,24 +477,39 @@ async function fetchSecurityTools() {
     console.error("ERROR FETCHING SECURITY TOOLS:", error);
   }
 }
+
+const updateField = (field, selectedOption) => {
+  emit("update:modelValue", {
+    ...props.modelValue,
+    [field]: { value: selectedOption.value, label: selectedOption.label },
+  });
+};
 </script>
 
 <template>
   <div>
     <h3>Ввод общей информации</h3>
 
+    <!-- Название компании -->
     <div class="form-floating mb-2">
       <input
         type="text"
         class="form-control"
         id="customerName"
         placeholder="Введите название компании"
-        v-model="dataModel.customerName"
+        v-model="dataModel.customerName.value"
+        @blur="
+          updateField('customerName', {
+            value: dataModel.customerName.value,
+            label: dataModel.customerName.value,
+          })
+        "
       />
       <label for="customerName">Название компании (заказчика)</label>
     </div>
     <div class="form-text mb-1">Например, ООО "Гарант" или ИП Иванов И. И.</div>
 
+    <!-- Категория -->
     <h4>Категория объекта</h4>
     <div
       v-for="cat in categoryOptions"
@@ -477,15 +522,17 @@ async function fetchSecurityTools() {
         :id="'cat-' + cat.value"
         name="category"
         :value="cat.value"
-        v-model="dataModel.category"
+        v-model="dataModel.category.value"
+        @change="updateField('category', cat)"
         :disabled="dataModel.isConfirmed"
       />
-      <label class="form-check-label" :for="'cat-' + cat.value">
-        {{ cat.label }}
-      </label>
+      <label class="form-check-label" :for="'cat-' + cat.value">{{
+        cat.label
+      }}</label>
     </div>
 
-    <div v-if="dataModel.category === 'GIS'">
+    <!-- GIS -->
+    <div v-if="dataModel.category.value === 'GIS'">
       <h5 class="mt-3">ГИС</h5>
       <p class="mb-1">Уровень значимости:</p>
       <div
@@ -499,14 +546,15 @@ async function fetchSecurityTools() {
           :id="'gisSignificance-' + opt.value"
           name="gisSignificance"
           :value="opt.value"
-          v-model="dataModel.significance"
+          v-model="dataModel.significance.value"
+          @change="updateField('significance', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'gisSignificance-' + opt.value">
-          {{ opt.label }}
-        </label>
+        <label class="form-check-label" :for="'gisSignificance-' + opt.value">{{
+          opt.label
+        }}</label>
       </div>
-      <p class="mb-1 mt-3">Масштаб информационной системы:</p>
+      <p class="mb-1 mt-3">Масштаб:</p>
       <div
         v-for="opt in gisScaleOptions"
         :key="opt.value"
@@ -518,17 +566,20 @@ async function fetchSecurityTools() {
           :id="'gisScale-' + opt.value"
           name="gisScale"
           :value="opt.value"
-          v-model="dataModel.systemScale"
+          v-model="dataModel.systemScale.value"
+          @change="updateField('systemScale', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'gisScale-' + opt.value">
-          {{ opt.label }}
-        </label>
+        <label class="form-check-label" :for="'gisScale-' + opt.value">{{
+          opt.label
+        }}</label>
       </div>
     </div>
 
-    <div v-else-if="dataModel.category === 'ISPDN'">
+    <!-- ISPDN -->
+    <div v-else-if="dataModel.category.value === 'ISPDN'">
       <h5 class="mt-3">ИСПДН</h5>
+      <!-- PDN Category -->
       <p class="mb-1">Категория ПДн:</p>
       <div
         v-for="opt in ispdnCategoryOptions"
@@ -541,13 +592,15 @@ async function fetchSecurityTools() {
           :id="'pdnCat-' + opt.value"
           name="pdnCategory"
           :value="opt.value"
-          v-model="dataModel.pdnCategory"
+          v-model="dataModel.pdnCategory.value"
+          @change="updateField('pdnCategory', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'pdnCat-' + opt.value">
-          {{ opt.label }}
-        </label>
+        <label class="form-check-label" :for="'pdnCat-' + opt.value">{{
+          opt.label
+        }}</label>
       </div>
+      <!-- Own Worker -->
       <p class="mb-1 mt-3">Собственный работник?</p>
       <div
         v-for="opt in ispdnOwnWorkerOptions"
@@ -560,13 +613,15 @@ async function fetchSecurityTools() {
           :id="'ownWorker-' + opt.value"
           name="ownWorker"
           :value="opt.value"
-          v-model="dataModel.ownWorker"
+          v-model="dataModel.ownWorker.value"
+          @change="updateField('ownWorker', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'ownWorker-' + opt.value">
-          {{ opt.label }}
-        </label>
+        <label class="form-check-label" :for="'ownWorker-' + opt.value">{{
+          opt.label
+        }}</label>
       </div>
+      <!-- Subject Count -->
       <p class="mb-1 mt-3">Количество субъектов:</p>
       <div
         v-for="opt in ispdnSubjectCountOptions"
@@ -579,14 +634,16 @@ async function fetchSecurityTools() {
           :id="'subjectCount-' + opt.value"
           name="subjectCount"
           :value="opt.value"
-          v-model="dataModel.subjectCount"
+          v-model="dataModel.subjectCount.value"
+          @change="updateField('subjectCount', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'subjectCount-' + opt.value">
-          {{ opt.label }}
-        </label>
+        <label class="form-check-label" :for="'subjectCount-' + opt.value">{{
+          opt.label
+        }}</label>
       </div>
-      <p class="mb-1 mt-3">Тип актуальных угроз:</p>
+      <!-- Threat Type -->
+      <p class="mb-1 mt-3">Тип угроз:</p>
       <div
         v-for="opt in ispdnThreatTypeOptions"
         :key="opt.value"
@@ -598,18 +655,21 @@ async function fetchSecurityTools() {
           :id="'threatType-' + opt.value"
           name="threatType"
           :value="opt.value"
-          v-model="dataModel.threatType"
+          v-model="dataModel.threatType.value"
+          @change="updateField('threatType', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'threatType-' + opt.value">
-          {{ opt.label }}
-        </label>
+        <label class="form-check-label" :for="'threatType-' + opt.value">{{
+          opt.label
+        }}</label>
       </div>
     </div>
 
-    <div v-else-if="dataModel.category === 'KII'">
+    <!-- KII -->
+    <div v-else-if="dataModel.category.value === 'KII'">
       <h5 class="mt-3">КИИ</h5>
-      <p class="mb-1">Критический уровень:</p>
+      <!-- Level -->
+      <p class="mb-1">Уровень:</p>
       <div
         v-for="opt in kiiLevelOptions"
         :key="opt.value"
@@ -621,13 +681,15 @@ async function fetchSecurityTools() {
           :id="'kiiLevel-' + opt.value"
           name="kiiLevel"
           :value="opt.value"
-          v-model="dataModel.kiiLevel"
+          v-model="dataModel.kiiLevel.value"
+          @change="updateField('kiiLevel', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'kiiLevel-' + opt.value">
-          {{ opt.label }}
-        </label>
+        <label class="form-check-label" :for="'kiiLevel-' + opt.value">{{
+          opt.label
+        }}</label>
       </div>
+      <!-- Significance Area -->
       <h6>Выбор значимости:</h6>
       <div
         v-for="opt in kiiSignificanceOptions"
@@ -640,14 +702,15 @@ async function fetchSecurityTools() {
           :id="'kiiArea-' + opt.value"
           name="kiiSignificanceArea"
           :value="opt.value"
-          v-model="dataModel.kiiSignificanceArea"
+          v-model="dataModel.kiiSignificanceArea.value"
+          @change="updateField('kiiSignificanceArea', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'kiiArea-' + opt.value">
-          {{ opt.label }}
-        </label>
+        <label class="form-check-label" :for="'kiiArea-' + opt.value">{{
+          opt.label
+        }}</label>
       </div>
-      <div v-if="dataModel.kiiSignificanceArea" class="mt-3">
+      <div v-if="dataModel.kiiSignificanceArea.value" class="mt-3">
         <table class="table table-bordered">
           <thead>
             <tr>

@@ -27,30 +27,46 @@ const selection = computed({
   },
 });
 
-const localTacticsData = computed(() => props.tacticsData);
+const flattenedData = computed(() => {
+  return props.tacticsData.flatMap((tacticItem) => {
+    const { tacticId, tacticName, tacticalTask, techniques } = tacticItem;
+    return techniques.map((tech) => ({
+      tactic: {
+        id: tacticId,
+        tacticName,
+        tacticalTask,
+      },
+      technique: {
+        id: tech.id,
+        techniqueDescription: tech.techniqueDescription,
+        techniqueNumber: tech.techniqueNumber,
+      },
+    }));
+  });
+});
 
 const groupedTactics = computed(() => {
   const groups = {};
-  localTacticsData.value.forEach((item) => {
-    const tacticId = item.tactic.id;
-    if (!groups[tacticId]) {
-      groups[tacticId] = {
+  flattenedData.value.forEach((item) => {
+    const tid = item.tactic.id;
+    if (!groups[tid]) {
+      groups[tid] = {
         tactic: item.tactic,
         techniques: [],
       };
     }
-    groups[tacticId].techniques.push(item.technique);
+    groups[tid].techniques.push(item.technique);
   });
   const arr = Object.values(groups);
   arr.sort((a, b) => a.tactic.id - b.tactic.id);
-  arr.forEach((group) => {
-    group.techniques.sort((a, b) => a.techniqueNumber - b.techniqueNumber);
+  arr.forEach((g) => {
+    g.techniques.sort((x, y) => x.techniqueNumber - y.techniqueNumber);
   });
   return arr;
 });
 
 const filteredThreats = computed(() => {
-  return props.threats.filter((threat) => threat.status === "возможна");
+  return props.threats.filter((t) => t.status === "POSSIBLE");
 });
 
 const sortedThreats = computed(() => {
@@ -60,44 +76,41 @@ const sortedThreats = computed(() => {
 function getSelectedTactics(threatId) {
   const sel = selection.value || {};
   if (!sel[threatId] || !sel[threatId].tactics) return [];
-  return groupedTactics.value.filter((group) =>
-    sel[threatId].tactics.includes(group.tactic.id)
+  return groupedTactics.value.filter((grp) =>
+    sel[threatId].tactics.includes(grp.tactic.id)
   );
 }
 
 function toggleTactic(threatId, tacticId) {
-  const newSelection = { ...selection.value };
-  if (!newSelection[threatId]) {
-    newSelection[threatId] = { tactics: [], techniques: {} };
+  const newSel = { ...selection.value };
+  if (!newSel[threatId]) {
+    newSel[threatId] = { tactics: [], techniques: {} };
   }
-  const idx = newSelection[threatId].tactics.indexOf(tacticId);
+  const idx = newSel[threatId].tactics.indexOf(tacticId);
   if (idx === -1) {
-    newSelection[threatId].tactics.push(tacticId);
+    newSel[threatId].tactics.push(tacticId);
   } else {
-    newSelection[threatId].tactics.splice(idx, 1);
-    delete newSelection[threatId].techniques[tacticId];
+    newSel[threatId].tactics.splice(idx, 1);
+    delete newSel[threatId].techniques[tacticId];
   }
-  selection.value = newSelection;
-  emit("update:selection", newSelection);
+  selection.value = newSel;
+  emit("update:selection", newSel);
 }
 
 function toggleTechnique(threatId, tacticId, techniqueId) {
-  const newSelection = { ...selection.value };
-  if (!newSelection[threatId]) {
-    newSelection[threatId] = { tactics: [], techniques: {} };
+  const newSel = { ...selection.value };
+  if (!newSel[threatId]) {
+    newSel[threatId] = { tactics: [], techniques: {} };
   }
-  if (!newSelection[threatId].techniques[tacticId]) {
-    newSelection[threatId].techniques[tacticId] = [];
+  if (!newSel[threatId].techniques[tacticId]) {
+    newSel[threatId].techniques[tacticId] = [];
   }
-  const arr = newSelection[threatId].techniques[tacticId];
+  const arr = newSel[threatId].techniques[tacticId];
   const idx = arr.indexOf(techniqueId);
-  if (idx === -1) {
-    arr.push(techniqueId);
-  } else {
-    arr.splice(idx, 1);
-  }
-  selection.value = newSelection;
-  emit("update:selection", newSelection);
+  if (idx === -1) arr.push(techniqueId);
+  else arr.splice(idx, 1);
+  selection.value = newSel;
+  emit("update:selection", newSel);
 }
 </script>
 
@@ -111,7 +124,7 @@ function toggleTechnique(threatId, tacticId, techniqueId) {
     >
       <h5>{{ "УБИ." + threat.id + ": " + threat.name }}</h5>
       <div class="d-flex">
-        <!-- Колонка для тактик -->
+        <!-- Колонка тактик -->
         <div class="tactics-column">
           <h6>Тактики</h6>
           <div
@@ -122,8 +135,7 @@ function toggleTechnique(threatId, tacticId, techniqueId) {
             <input
               class="form-check-input"
               type="checkbox"
-              :id="'threat-' + threat.id + '-tactic-' + group.tactic.id"
-              :value="group.tactic.id"
+              :id="`threat-${threat.id}-tactic-${group.tactic.id}`"
               :checked="
                 selection[threat.id] &&
                 selection[threat.id].tactics.includes(group.tactic.id)
@@ -132,40 +144,29 @@ function toggleTechnique(threatId, tacticId, techniqueId) {
             />
             <label
               class="form-check-label"
-              :for="'threat-' + threat.id + '-tactic-' + group.tactic.id"
+              :for="`threat-${threat.id}-tactic-${group.tactic.id}`"
             >
-              {{ "Т" + group.tactic.id + ". " + group.tactic.tacticName }}
+              {{ "T" + group.tactic.id + ". " + group.tactic.tacticName }}
             </label>
           </div>
         </div>
         <div style="width: 20px"></div>
-        <!-- Колонка для техник -->
         <div class="techniques-column">
           <h6>Техники</h6>
           <div
             v-for="group in getSelectedTactics(threat.id)"
-            :key="'tech-group-' + threat.id + '-' + group.tactic.id"
+            :key="`tech-group-${threat.id}-${group.tactic.id}`"
             class="mb-2"
           >
             <div
               v-for="tech in group.techniques"
-              :key="
-                'technique-' + threat.id + '-' + group.tactic.id + '-' + tech.id
-              "
+              :key="`technique-${threat.id}-${group.tactic.id}-${tech.id}`"
               class="form-check"
             >
               <input
                 class="form-check-input"
                 type="checkbox"
-                :id="
-                  'threat-' +
-                  threat.id +
-                  '-tech-' +
-                  group.tactic.id +
-                  '-' +
-                  tech.id
-                "
-                :value="tech.id"
+                :id="`threat-${threat.id}-tech-${group.tactic.id}-${tech.id}`"
                 :checked="
                   selection[threat.id] &&
                   selection[threat.id].techniques[group.tactic.id] &&
@@ -177,17 +178,10 @@ function toggleTechnique(threatId, tacticId, techniqueId) {
               />
               <label
                 class="form-check-label"
-                :for="
-                  'threat-' +
-                  threat.id +
-                  '-tech-' +
-                  group.tactic.id +
-                  '-' +
-                  tech.id
-                "
+                :for="`threat-${threat.id}-tech-${group.tactic.id}-${tech.id}`"
               >
                 {{
-                  "Т" +
+                  "T" +
                   group.tactic.id +
                   "." +
                   tech.techniqueNumber +

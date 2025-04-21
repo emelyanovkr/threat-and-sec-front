@@ -9,6 +9,7 @@ import ViolatorsInfo from "@/components/threat-model-input/ViolatorsInfo.vue";
 import ThreatsExecutionMethods from "@/components/threat-model-input/ThreatsExecutionMethods.vue";
 import ActualThreats from "@/components/threat-model-input/ActualThreats.vue";
 import TacticTechnic from "@/components/threat-model-input/TacticTechnic.vue";
+import GenerateReport from "@/components/GenerateReport.vue";
 
 const steps = [
   "Общая информация",
@@ -20,35 +21,40 @@ const steps = [
   "Актуальные УБИ",
   "Тактики и техники",
   "Генерация отчета",
+  "Подбор СЗИ",
 ];
 
 const currentStep = ref(0);
 
 const formData = ref({
   generalInformation: {
-    customerName: "",
-    category: "",
-    significance: "",
-    systemScale: "",
-    pdnCategory: "",
-    ownWorker: "",
-    subjectCount: "",
-    threatType: "",
-    kiiLevel: "",
-    kiiSignificanceArea: "",
-    kiiCategoryPick: "",
-    kiiCategoryResult: "",
+    customerName: { value: "", label: "" },
+    category: { value: "", label: "" },
+    significance: { value: "", label: "" },
+    systemScale: { value: "", label: "" },
+    pdnCategory: { value: "", label: "" },
+    ownWorker: { value: "", label: "" },
+    subjectCount: { value: "", label: "" },
+    threatType: { value: "", label: "" },
+    kiiLevel: { value: "", label: "" },
+    kiiSignificanceArea: { value: "", label: "" },
+    kiiCategoryPick: { value: "", label: "" },
+    kiiCategoryResult: { value: "", label: "" },
     defensiveMeasures: [],
     securityTools: [],
     isConfirmed: false,
   },
-  systemData: [],
+  networkTable: [],
   influenceObjects: [],
   risksAndConsequences: {
     riskData: [],
     isRiskDataLoaded: false,
   },
-  attackersInfo: [],
+  violatorsInfo: {
+    offenders: [],
+    isOffendersLoaded: false,
+    offendersInfo: [],
+  },
   threatsExecution: [],
   actualThreats: [],
   tacticsAndTechniquesSelection: {},
@@ -62,37 +68,44 @@ const nextDisabled = ref(false);
 
 const isGeneralInfoValid = computed(() => {
   const info = formData.value.generalInformation;
+  const pickVal = info.kiiCategoryPick?.value ?? info.kiiCategoryPick;
 
-  if (!info.customerName.trim() || !info.category.trim()) {
+  // Basic required fields
+  if (!info.customerName.value.trim() || !info.category.value.trim()) {
     return false;
   }
 
-  switch (info.category) {
+  switch (info.category.value) {
     case "GIS":
-      return info.significance.trim() !== "" && info.systemScale.trim() !== "";
+      return (
+        info.significance.value.trim() !== "" &&
+        info.systemScale.value.trim() !== ""
+      );
+
     case "ISPDN":
       return (
-        info.pdnCategory.trim() !== "" &&
-        info.ownWorker.trim() !== "" &&
-        info.subjectCount.trim() !== "" &&
-        info.threatType.trim() !== ""
+        info.pdnCategory.value.trim() !== "" &&
+        info.ownWorker.value.trim() !== "" &&
+        info.subjectCount.value.trim() !== "" &&
+        info.threatType.value.trim() !== ""
       );
+
     case "KII":
       return (
-        info.kiiLevel.trim() !== "" &&
-        info.kiiSignificanceArea.trim() !== "" &&
-        info.kiiCategoryPick.trim() !== ""
+        info.kiiLevel.value.trim() !== "" &&
+        info.kiiSignificanceArea.value.trim() !== "" &&
+        typeof pickVal === "string" &&
+        pickVal.trim() !== ""
       );
+
     default:
       return false;
   }
 });
 
-watch(isGeneralInfoValid, (newVal) => {
-  if (newVal) {
-    nextDisabled.value = false;
-    showErrorMessage.value = false;
-  }
+watch(isGeneralInfoValid, (valid) => {
+  nextDisabled.value = !valid;
+  if (valid) showErrorMessage.value = false;
 });
 
 function nextStep() {
@@ -101,31 +114,7 @@ function nextStep() {
     nextDisabled.value = true;
     return;
   }
-  const general = formData.value.generalInformation;
-  console.log("Selected category:", general.category);
-
-  switch (general.category) {
-    case "ГИС":
-      console.log("GIS Significance:", general.significance);
-      console.log("System Scale:", general.systemScale);
-      break;
-    case "ИСПДН":
-      console.log("PDN Category:", general.pdnCategory);
-      console.log("Own Worker:", general.ownWorker);
-      console.log("Subject Count:", general.subjectCount);
-      console.log("Threat Type:", general.threatType);
-      break;
-    case "КИИ":
-      console.log("KII Level:", general.kiiLevel);
-      console.log("Selected Significance (Branch):", general.kiiCategoryPick);
-      break;
-    default:
-      break;
-  }
-
-  if (currentStep.value < steps.length - 1) {
-    currentStep.value++;
-  }
+  if (currentStep.value < steps.length - 1) currentStep.value++;
 }
 
 function prevStep() {
@@ -167,7 +156,7 @@ function prevStep() {
               <GeneralInformation v-model="formData.generalInformation" />
             </div>
             <div v-else-if="currentStep === 1">
-              <SystemsNetworksTable v-model="formData.systemData" />
+              <SystemsNetworksTable v-model="formData.networkTable" />
             </div>
             <div v-else-if="currentStep === 2">
               <InfluenceObjects
@@ -179,7 +168,7 @@ function prevStep() {
               <RisksAndConsequences v-model="formData.risksAndConsequences" />
             </div>
             <div v-else-if="currentStep === 4">
-              <ViolatorsInfo v-model="formData.attackersInfo" />
+              <ViolatorsInfo v-model="formData.violatorsInfo" />
             </div>
             <div v-else-if="currentStep === 5">
               <ThreatsExecutionMethods v-model="formData.threatsExecution" />
@@ -196,6 +185,9 @@ function prevStep() {
                 :threats="formData.actualThreats"
                 :tactics-data="formData.tacticsData"
               />
+            </div>
+            <div v-else-if="currentStep === 8">
+              <GenerateReport :formData="formData" />
             </div>
           </div>
         </div>

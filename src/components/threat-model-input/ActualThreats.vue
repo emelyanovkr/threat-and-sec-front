@@ -28,7 +28,7 @@ watch(
   (newVal) => {
     newVal.forEach((threat) => {
       if (!threat.status) {
-        threat.status = "возможна";
+        threat.status = "POSSIBLE";
       }
     });
   },
@@ -36,8 +36,8 @@ watch(
 );
 
 const possibilityOptions = [
-  { value: "возможна", label: "Возможна" },
-  { value: "не возможна", label: "Не возможна" },
+  { value: "POSSIBLE", label: "Возможна" },
+  { value: "NOT POSSIBLE", label: "Не возможна" },
 ];
 
 const locked = ref(false);
@@ -65,7 +65,7 @@ async function fetchTacticsAndTechniques() {
 function resetActualThreats() {
   actualThreats.value = actualThreats.value.map((threat) => ({
     ...threat,
-    status: "возможна",
+    status: "POSSIBLE",
   }));
 }
 
