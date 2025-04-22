@@ -8,7 +8,6 @@ const props = defineProps({
     default: () => [],
   },
 });
-
 const emit = defineEmits(["update:modelValue"]);
 
 const localData = ref(
@@ -21,14 +20,24 @@ const localData = ref(
           systemPurpose: "",
           userCategories: "",
           systemPriority: "",
-          userCount: "",
+          userCount: null,
           systemPosition: "",
           locked: false,
         },
       ]
 );
-
 let nextId = localData.value.length ? localData.value.length + 1 : 2;
+
+function isRowComplete(row) {
+  return (
+    row.systemName &&
+    row.systemPurpose &&
+    row.userCategories &&
+    row.systemPriority &&
+    row.userCount !== null &&
+    row.systemPosition
+  );
+}
 
 function addRow() {
   localData.value.push({
@@ -37,7 +46,7 @@ function addRow() {
     systemPurpose: "",
     userCategories: "",
     systemPriority: "",
-    userCount: "",
+    userCount: null,
     systemPosition: "",
     locked: false,
   });
@@ -49,14 +58,7 @@ function removeRow(index) {
 
 function saveRow(index) {
   const row = localData.value[index];
-  if (
-    row.systemName &&
-    row.systemPurpose &&
-    row.userCategories &&
-    row.systemPriority &&
-    row.userCount &&
-    row.systemPosition
-  ) {
+  if (isRowComplete(row)) {
     row.locked = true;
   } else {
     Swal.fire({
@@ -79,7 +81,6 @@ watch(
   },
   { deep: true }
 );
-
 watch(
   () => props.modelValue,
   (newValue) => {
@@ -130,25 +131,28 @@ watch(
                 type="text"
                 class="form-control"
                 v-model="row.userCategories"
-                placeholder="Укажите категории пользователей "
+                placeholder="Укажите категории пользователей"
                 :disabled="row.locked"
               />
             </td>
             <td>
-              <input
-                type="text"
-                class="form-control"
+              <select
+                class="form-select"
                 v-model="row.systemPriority"
-                placeholder="Укажите критичность сервиса"
                 :disabled="row.locked"
-              />
+              >
+                <option disabled value="">Выберите критичность</option>
+                <option value="HIGH">Высокая</option>
+                <option value="MEDIUM">Средняя</option>
+                <option value="MINIMAL">Минимальная</option>
+              </select>
             </td>
             <td>
               <input
-                type="text"
+                type="number"
                 class="form-control"
-                v-model="row.userCount"
-                placeholder="Укажите количество пользователей"
+                v-model.number="row.userCount"
+                placeholder="Укажите количество"
                 :disabled="row.locked"
               />
             </td>
@@ -157,7 +161,7 @@ watch(
                 type="text"
                 class="form-control"
                 v-model="row.systemPosition"
-                placeholder="Введите расположение системы"
+                placeholder="Введите расположение"
                 :disabled="row.locked"
               />
             </td>
@@ -166,10 +170,11 @@ watch(
                 <div
                   v-if="!row.locked"
                   class="bi-check-circle-fill text-success"
-                  @click="saveRow(index)"
+                  :class="{ disabled: !isRowComplete(row) }"
+                  @click="isRowComplete(row) && saveRow(index)"
                 ></div>
                 <div
-                  v-if="row.locked"
+                  v-else
                   class="bi-pencil-fill"
                   @click="editRow(index)"
                 ></div>
@@ -243,11 +248,10 @@ th {
   transform: scale(1.1);
 }
 
-.form-control {
-  &:focus {
-    border-color: #a11919;
-    box-shadow: none;
-  }
+.form-select:focus,
+.form-control:focus {
+  border-color: #a11919;
+  box-shadow: none;
 }
 
 .delete-button {
