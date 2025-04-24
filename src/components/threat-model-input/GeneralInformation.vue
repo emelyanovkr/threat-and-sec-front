@@ -7,16 +7,16 @@ const props = defineProps({
     default: () => ({
       customerName: { value: "", label: "" },
       category: { value: "", label: "" },
-      significance: { value: "", label: "" },
-      systemScale: { value: "", label: "" },
-      pdnCategory: { value: "", label: "" },
-      ownWorker: { value: "", label: "" },
-      subjectCount: { value: "", label: "" },
-      threatType: { value: "", label: "" },
+      gisSignificance: { value: "", label: "" },
+      gisSystemScale: { value: "", label: "" },
+      ispdnCategory: { value: "", label: "" },
+      ispdnOwnWorker: { value: "", label: "" },
+      ispdnSubjectCount: { value: "", label: "" },
+      ispdnThreatType: { value: "", label: "" },
       kiiLevel: { value: "", label: "" },
       kiiSignificanceArea: { value: "", label: "" },
       kiiCategoryPick: { value: "", label: "" },
-      kiiCategoryResult: { value: "", label: "" },
+      kiiSignificanceCategory: { value: "", label: "" },
       defensiveMeasures: [],
       securityTools: [],
       isConfirmed: false,
@@ -291,7 +291,7 @@ watch(
   (newPick) => {
     const raw = typeof newPick === "object" ? newPick.value : newPick;
     if (!raw) {
-      dataModel.value.kiiCategoryResult = { value: "", label: "" };
+      dataModel.value.kiiSignificanceCategory = { value: "", label: "" };
       return;
     }
     const [, cat] = raw.split("-");
@@ -312,7 +312,7 @@ watch(
         break;
     }
 
-    dataModel.value.kiiCategoryResult = { value: cat, label: label };
+    dataModel.value.kiiSignificanceCategory = { value: cat, label: label };
   },
   { immediate: true }
 );
@@ -322,13 +322,13 @@ watch(
   (newVal, oldVal) => {
     if (newVal !== oldVal) {
       dataModel.value.kiiCategoryPick = "";
-      dataModel.value.kiiCategoryResult = "";
+      dataModel.value.kiiSignificanceCategory = "";
     }
   }
 );
 
 const romanCategory = computed(() => {
-  switch (dataModel.value.kiiCategoryResult.value) {
+  switch (dataModel.value.kiiSignificanceCategory.value) {
     case "3":
       return "III";
     case "2":
@@ -345,13 +345,13 @@ const isFormValid = computed(() => {
   if (!dm.customerName || !dm.customerName.value.trim()) return false;
   switch (dm.category.value) {
     case "GIS":
-      return dm.significance.value && dm.systemScale.value;
+      return dm.gisSignificance.value && dm.gisSystemScale.value;
     case "ISPDN":
       return (
-        dm.pdnCategory.value &&
-        dm.ownWorker.value &&
-        dm.subjectCount.value &&
-        dm.threatType.value
+        dm.ispdnCategory.value &&
+        dm.ispdnOwnWorker.value &&
+        dm.ispdnSubjectCount.value &&
+        dm.ispdnThreatType.value
       );
     case "KII":
       return (
@@ -380,22 +380,22 @@ async function fetchDefensiveMeasures() {
   if (dm.category.value === "GIS") {
     requestData = {
       systemCategory: dm.category.value,
-      gisScale: dm.systemScale.value,
-      gisSignificance: dm.significance.value,
+      gisScale: dm.gisSystemScale.value,
+      gisSignificance: dm.gisSignificance.value,
     };
   } else if (dm.category.value === "ISPDN") {
     requestData = {
       systemCategory: dm.category.value,
-      pdCategory: dm.pdnCategory.value,
-      ownWorker: dm.ownWorker.value,
-      subjectCount: dm.subjectCount.value,
-      threatType: dm.threatType.value,
+      ispdnCategory: dm.ispdnCategory.value,
+      ispdnOwnWorker: dm.ispdnOwnWorker.value,
+      ispdnSubjectCount: dm.ispdnSubjectCount.value,
+      ispdnThreatType: dm.ispdnThreatType.value,
     };
   } else if (dm.category.value === "KII") {
     requestData = {
       systemCategory: dm.category.value,
-      kiiSecurityClass:
-        parseInt(dataModel.value.kiiCategoryResult.value) || null,
+      kiiSignificanceCategory:
+        parseInt(dataModel.value.kiiSignificanceCategory.value) || null,
     };
   }
   console.log("Fetching defensive measures:", requestData);
@@ -546,8 +546,8 @@ const updateField = (field, selectedOption) => {
           :id="'gisSignificance-' + opt.value"
           name="gisSignificance"
           :value="opt.value"
-          v-model="dataModel.significance.value"
-          @change="updateField('significance', opt)"
+          v-model="dataModel.gisSignificance.value"
+          @change="updateField('gisSignificance', opt)"
           :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'gisSignificance-' + opt.value">{{
@@ -566,8 +566,8 @@ const updateField = (field, selectedOption) => {
           :id="'gisScale-' + opt.value"
           name="gisScale"
           :value="opt.value"
-          v-model="dataModel.systemScale.value"
-          @change="updateField('systemScale', opt)"
+          v-model="dataModel.gisSystemScale.value"
+          @change="updateField('gisSystemScale', opt)"
           :disabled="dataModel.isConfirmed"
         />
         <label class="form-check-label" :for="'gisScale-' + opt.value">{{
@@ -589,14 +589,14 @@ const updateField = (field, selectedOption) => {
         <input
           class="form-check-input"
           type="radio"
-          :id="'pdnCat-' + opt.value"
-          name="pdnCategory"
+          :id="'ispdnCat-' + opt.value"
+          name="ispdnCategory"
           :value="opt.value"
-          v-model="dataModel.pdnCategory.value"
-          @change="updateField('pdnCategory', opt)"
+          v-model="dataModel.ispdnCategory.value"
+          @change="updateField('ispdnCategory', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'pdnCat-' + opt.value">{{
+        <label class="form-check-label" :for="'ispdnCat-' + opt.value">{{
           opt.label
         }}</label>
       </div>
@@ -610,14 +610,14 @@ const updateField = (field, selectedOption) => {
         <input
           class="form-check-input"
           type="radio"
-          :id="'ownWorker-' + opt.value"
-          name="ownWorker"
+          :id="'ispdnOwnWorker-' + opt.value"
+          name="ispdnOwnWorker"
           :value="opt.value"
-          v-model="dataModel.ownWorker.value"
-          @change="updateField('ownWorker', opt)"
+          v-model="dataModel.ispdnOwnWorker.value"
+          @change="updateField('ispdnOwnWorker', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'ownWorker-' + opt.value">{{
+        <label class="form-check-label" :for="'ispdnOwnWorker-' + opt.value">{{
           opt.label
         }}</label>
       </div>
@@ -631,16 +631,18 @@ const updateField = (field, selectedOption) => {
         <input
           class="form-check-input"
           type="radio"
-          :id="'subjectCount-' + opt.value"
-          name="subjectCount"
+          :id="'ispdnSubjectCount-' + opt.value"
+          name="ispdnSubjectCount"
           :value="opt.value"
-          v-model="dataModel.subjectCount.value"
-          @change="updateField('subjectCount', opt)"
+          v-model="dataModel.ispdnSubjectCount.value"
+          @change="updateField('ispdnSubjectCount', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'subjectCount-' + opt.value">{{
-          opt.label
-        }}</label>
+        <label
+          class="form-check-label"
+          :for="'ispdnSubjectCount-' + opt.value"
+          >{{ opt.label }}</label
+        >
       </div>
       <!-- Threat Type -->
       <p class="mb-1 mt-3">Тип угроз:</p>
@@ -652,14 +654,14 @@ const updateField = (field, selectedOption) => {
         <input
           class="form-check-input"
           type="radio"
-          :id="'threatType-' + opt.value"
-          name="threatType"
+          :id="'ispdnThreatType-' + opt.value"
+          name="ispdnThreatType"
           :value="opt.value"
-          v-model="dataModel.threatType.value"
-          @change="updateField('threatType', opt)"
+          v-model="dataModel.ispdnThreatType.value"
+          @change="updateField('ispdnThreatType', opt)"
           :disabled="dataModel.isConfirmed"
         />
-        <label class="form-check-label" :for="'threatType-' + opt.value">{{
+        <label class="form-check-label" :for="'ispdnThreatType-' + opt.value">{{
           opt.label
         }}</label>
       </div>

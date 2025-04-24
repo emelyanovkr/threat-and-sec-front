@@ -30,16 +30,16 @@ const formData = ref({
   generalInformation: {
     customerName: { value: "", label: "" },
     category: { value: "", label: "" },
-    significance: { value: "", label: "" },
-    systemScale: { value: "", label: "" },
-    pdnCategory: { value: "", label: "" },
-    ownWorker: { value: "", label: "" },
-    subjectCount: { value: "", label: "" },
-    threatType: { value: "", label: "" },
+    gisSignificance: { value: "", label: "" },
+    gisSystemScale: { value: "", label: "" },
+    ispdnCategory: { value: "", label: "" },
+    ispdnOwnWorker: { value: "", label: "" },
+    ispdnSubjectCount: { value: "", label: "" },
+    ispdnThreatType: { value: "", label: "" },
     kiiLevel: { value: "", label: "" },
     kiiSignificanceArea: { value: "", label: "" },
     kiiCategoryPick: { value: "", label: "" },
-    kiiCategoryResult: { value: "", label: "" },
+    kiiSignificanceCategory: { value: "", label: "" },
     defensiveMeasures: [],
     securityTools: [],
     isConfirmed: false,
@@ -78,16 +78,16 @@ const isGeneralInfoValid = computed(() => {
   switch (info.category.value) {
     case "GIS":
       return (
-        info.significance.value.trim() !== "" &&
-        info.systemScale.value.trim() !== ""
+        info.gisSignificance.value.trim() !== "" &&
+        info.gisSystemScale.value.trim() !== ""
       );
 
     case "ISPDN":
       return (
-        info.pdnCategory.value.trim() !== "" &&
-        info.ownWorker.value.trim() !== "" &&
-        info.subjectCount.value.trim() !== "" &&
-        info.threatType.value.trim() !== ""
+        info.ispdnCategory.value.trim() !== "" &&
+        info.ispdnOwnWorker.value.trim() !== "" &&
+        info.ispdnSubjectCount.value.trim() !== "" &&
+        info.ispdnThreatType.value.trim() !== ""
       );
 
     case "KII":

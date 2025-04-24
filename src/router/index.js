@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import ThreatModellingView from "@/views/ThreatModellingView.vue";
+import ReportsHistoryView from "@/views/ReportsHistoryView.vue";
 
 const routes = [
   {
@@ -12,6 +13,11 @@ const routes = [
     path: "/threat-modelling",
     name: "threat-modelling",
     component: ThreatModellingView,
+  },
+  {
+    path: "/profile",
+    name: "profile",
+    component: ReportsHistoryView,
   },
 ];
 

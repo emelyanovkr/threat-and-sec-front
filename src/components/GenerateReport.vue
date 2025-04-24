@@ -12,11 +12,41 @@ const props = defineProps({
 const isDownloading = ref(false);
 
 async function generateReportData() {
+  // Базовая общая информация
+  const generalInfoBase = {
+    customerName: props.formData.generalInformation.customerName.value,
+    category: props.formData.generalInformation.category.value,
+  };
+
+  switch (generalInfoBase.category) {
+    case "GIS":
+      generalInfoBase.gisSignificance =
+        props.formData.generalInformation.gisSignificance.value;
+      generalInfoBase.gisSystemScale =
+        props.formData.generalInformation.gisSystemScale.value;
+      break;
+    case "ISPDN":
+      generalInfoBase.ispdnCategory =
+        props.formData.generalInformation.ispdnCategory.value;
+      generalInfoBase.ispdnOwnWorker =
+        props.formData.generalInformation.ispdnOwnWorker.value;
+      generalInfoBase.ispdnSubjectCount =
+        props.formData.generalInformation.ispdnSubjectCount.value;
+      generalInfoBase.ispdnThreatType =
+        props.formData.generalInformation.ispdnThreatType.value;
+      break;
+    case "KII":
+      generalInfoBase.kiiLevel =
+        props.formData.generalInformation.kiiLevel.value;
+      generalInfoBase.kiiSignificanceArea =
+        props.formData.generalInformation.kiiSignificanceArea.value;
+      generalInfoBase.kiiSignificanceCategory =
+        props.formData.generalInformation.kiiSignificanceCategory.value;
+      break;
+  }
+
   return {
-    generalInformation: {
-      customerName: props.formData.generalInformation.customerName.value,
-      category: props.formData.generalInformation.category.value,
-    },
+    generalInformation: generalInfoBase,
     networkTable: props.formData.networkTable
       .filter((row) => Object.values(row).every((v) => v !== ""))
       .map((row) => ({
@@ -87,7 +117,6 @@ async function downloadReport() {
     const match = disp.match(/filename="(.+)"/);
     const fileName = match ? match[1] : `report_${Date.now()}.docx`;
 
-    // выбор директории и сохранение
     if ("showSaveFilePicker" in window) {
       try {
         const handle = await window.showSaveFilePicker({
@@ -106,7 +135,7 @@ async function downloadReport() {
         await writable.write(blob);
         await writable.close();
       } catch {
-        // если отменено, падаем обратно на fallback
+        // falling on fallback
       }
     } else {
       const url = window.URL.createObjectURL(blob);
@@ -160,11 +189,11 @@ async function downloadReport() {
       >
         <div class="mb-2 me-4">
           <strong>Уровень значимости:</strong>
-          {{ props.formData.generalInformation.significance.label }}
+          {{ props.formData.generalInformation.gisSignificance.label }}
         </div>
         <div class="mb-2 me-4">
           <strong>Масштаб системы:</strong>
-          {{ props.formData.generalInformation.systemScale.label }}
+          {{ props.formData.generalInformation.gisSystemScale.label }}
         </div>
       </template>
       <template
@@ -172,19 +201,19 @@ async function downloadReport() {
       >
         <div class="mb-2 me-4">
           <strong>Категория ПДн:</strong>
-          {{ props.formData.generalInformation.pdnCategory.label }}
+          {{ props.formData.generalInformation.ispdnCategory.label }}
         </div>
         <div class="mb-2 me-4">
           <strong>Собственный работник:</strong>
-          {{ props.formData.generalInformation.ownWorker.label }}
+          {{ props.formData.generalInformation.ispdnOwnWorker.label }}
         </div>
         <div class="mb-2 me-4">
           <strong>Количество субъектов:</strong>
-          {{ props.formData.generalInformation.subjectCount.label }}
+          {{ props.formData.generalInformation.ispdnSubjectCount.label }}
         </div>
         <div class="mb-2 me-4">
           <strong>Тип угроз:</strong>
-          {{ props.formData.generalInformation.threatType.label }}
+          {{ props.formData.generalInformation.ispdnThreatType.label }}
         </div>
       </template>
       <template
@@ -200,7 +229,7 @@ async function downloadReport() {
         </div>
         <div class="mb-2 me-4">
           <strong>Итоговая категория:</strong>
-          {{ props.formData.generalInformation.kiiCategoryResult.label }}
+          {{ props.formData.generalInformation.kiiSignificanceCategory.label }}
         </div>
       </template>
     </div>
