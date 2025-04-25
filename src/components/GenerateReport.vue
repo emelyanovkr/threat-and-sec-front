@@ -12,7 +12,6 @@ const props = defineProps({
 const isDownloading = ref(false);
 
 async function generateReportData() {
-  // Базовая общая информация
   const generalInfoBase = {
     customerName: props.formData.generalInformation.customerName.value,
     category: props.formData.generalInformation.category.value,
@@ -72,8 +71,8 @@ async function generateReportData() {
           .map((consequence) => consequence.id),
       })),
     violatorsInformationChosenIds: props.formData.violatorsInfo.offendersInfo
-      .filter((att) => att.categoryId || att.sourceId)
-      .map((att) => att.id),
+      .filter((id) => id != null)
+      .map((id) => Number(id)),
     threatsExecutionMethodsIds: props.formData.threatsExecution.map((id) =>
       Number(id)
     ),

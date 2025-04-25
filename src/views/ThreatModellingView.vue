@@ -10,6 +10,7 @@ import ThreatsExecutionMethods from "@/components/threat-model-input/ThreatsExec
 import ActualThreats from "@/components/threat-model-input/ActualThreats.vue";
 import TacticTechnic from "@/components/threat-model-input/TacticTechnic.vue";
 import GenerateReport from "@/components/GenerateReport.vue";
+import FetchDefensiveMeasures from "@/components/FetchDefensiveMeasures.vue";
 
 const steps = [
   "Общая информация",
@@ -42,7 +43,6 @@ const formData = ref({
     kiiSignificanceCategory: { value: "", label: "" },
     defensiveMeasures: [],
     securityTools: [],
-    isConfirmed: false,
   },
   networkTable: [],
   influenceObjects: [],
@@ -188,6 +188,9 @@ function prevStep() {
             </div>
             <div v-else-if="currentStep === 8">
               <GenerateReport :formData="formData" />
+            </div>
+            <div v-else-if="currentStep === 9">
+              <FetchDefensiveMeasures v-model="formData.generalInformation" />
             </div>
           </div>
         </div>
