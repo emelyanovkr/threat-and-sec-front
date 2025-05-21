@@ -7,7 +7,7 @@ const props = defineProps({
     default: () => [],
   },
 });
-const emit = defineEmits(["update:modelValue", "update:actualThreats"]);
+const emit = defineEmits(["update:modelValue"]);
 
 const defaultItems = [
   { label: "Аппаратное обеспечение", applies: false },
@@ -67,34 +67,7 @@ watch(
   { deep: true }
 );
 
-async function fetchRelevantThreats() {
-  const selectedObjects = items.value
-    .filter((item) => item.applies)
-    .map((item) => item.label);
-
-  try {
-    const response = await fetch("/api/relevant-threats", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(selectedObjects),
-    });
-    if (!response.ok) {
-      throw new Error("Ошибка получения данных с сервера");
-    }
-    const actualThreats = await response.json();
-    emit("update:modelValue", items.value);
-    emit("update:actualThreats", actualThreats);
-  } catch (error) {
-    console.error("Ошибка сохранения объектов воздействия:", error);
-  }
-}
-
 function handleSave() {
-  if (!locked.value) {
-    fetchRelevantThreats();
-  }
   locked.value = !locked.value;
 }
 </script>

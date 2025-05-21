@@ -37,7 +37,7 @@ watch(
 
 const possibilityOptions = [
   { value: "POSSIBLE", label: "Возможна" },
-  { value: "NOT POSSIBLE", label: "Не возможна" },
+  { value: "NOT POSSIBLE", label: "Невозможна" },
 ];
 
 const locked = ref(false);

@@ -191,7 +191,7 @@ async function deleteReport(reportId, idx) {
 </script>
 
 <template>
-  <div class="container my-4">
+  <div class="container my-2">
     <h2 class="mb-3">История отчетов</h2>
 
     <div v-if="loading" class="text-center py-5">
@@ -244,6 +244,10 @@ async function deleteReport(reportId, idx) {
               <div class="h5 fw-bold mb-1">Отчет #{{ rep.id }}</div>
               <div class="text-muted mb-2">
                 Сгенерирован: {{ formatDate(rep.createdAt) }}
+              </div>
+              <div class="mb-2">
+                <strong>Имя компании (заказчика):</strong>
+                {{ rep.customerName }}
               </div>
               <div class="mb-1">
                 <strong>Категория системы:</strong>

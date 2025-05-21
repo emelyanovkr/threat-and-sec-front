@@ -14,10 +14,10 @@ const isDownloading = ref(false);
 async function generateReportData() {
   const generalInfoBase = {
     customerName: props.formData.generalInformation.customerName.value,
-    category: props.formData.generalInformation.category.value,
+    systemCategory: props.formData.generalInformation.category.value,
   };
 
-  switch (generalInfoBase.category) {
+  switch (generalInfoBase.systemCategory) {
     case "GIS":
       generalInfoBase.gisSignificance =
         props.formData.generalInformation.gisSignificance.value;

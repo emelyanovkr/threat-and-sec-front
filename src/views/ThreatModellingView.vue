@@ -114,7 +114,11 @@ function nextStep() {
     nextDisabled.value = true;
     return;
   }
-  if (currentStep.value < steps.length - 1) currentStep.value++;
+  if (currentStep.value < steps.length - 1) {
+    currentStep.value++;
+  } else {
+    nextDisabled.value = true;
+  }
 }
 
 function prevStep() {
@@ -159,16 +163,16 @@ function prevStep() {
               <SystemsNetworksTable v-model="formData.networkTable" />
             </div>
             <div v-else-if="currentStep === 2">
-              <InfluenceObjects
-                v-model="formData.influenceObjects"
-                @update:actualThreats="formData.actualThreats = $event"
-              />
+              <InfluenceObjects v-model="formData.influenceObjects" />
             </div>
             <div v-else-if="currentStep === 3">
               <RisksAndConsequences v-model="formData.risksAndConsequences" />
             </div>
             <div v-else-if="currentStep === 4">
-              <ViolatorsInfo v-model="formData.violatorsInfo" />
+              <ViolatorsInfo
+                v-model="formData.violatorsInfo"
+                @update:actualThreats="formData.actualThreats = $event"
+              />
             </div>
             <div v-else-if="currentStep === 5">
               <ThreatsExecutionMethods v-model="formData.threatsExecution" />

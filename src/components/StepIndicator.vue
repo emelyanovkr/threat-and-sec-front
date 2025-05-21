@@ -47,7 +47,7 @@ defineProps({
     }
 
     .step.active {
-      background-color: #8e1616;
+      background-color: #a11919;
       color: #fff;
       font-weight: bold;
     }

@@ -402,7 +402,6 @@ const updateField = (field, selectedOption) => {
       />
       <label for="customerName">Название компании (заказчика)</label>
     </div>
-    <div class="form-text mb-1">Например, ООО "Гарант" или ИП Иванов И. И.</div>
 
     <!-- Категория -->
     <h4>Категория объекта</h4>
