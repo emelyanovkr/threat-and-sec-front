@@ -6,7 +6,7 @@ import GeneralInformation from "@/components/threat-model-input/GeneralInformati
 import InfluenceObjects from "@/components/threat-model-input/InfluenceObjects.vue";
 import RisksAndConsequences from "@/components/threat-model-input/RisksAndConsequences.vue";
 import ViolatorsInfo from "@/components/threat-model-input/ViolatorsInfo.vue";
-import ThreatsExecutionMethods from "@/components/threat-model-input/ThreatsExecutionMethods.vue";
+// import ThreatsExecutionMethods from "@/components/threat-model-input/ThreatsExecutionMethods.vue";
 import ActualThreats from "@/components/threat-model-input/ActualThreats.vue";
 import TacticTechnic from "@/components/threat-model-input/TacticTechnic.vue";
 import GenerateReport from "@/components/GenerateReport.vue";
@@ -18,7 +18,7 @@ const steps = [
   "Объекты воздействия",
   "Риски и последствия",
   "Нарушители",
-  "Способы реализации угроз",
+  // "Способы реализации угроз",
   "Актуальные УБИ",
   "Тактики и техники",
   "Генерация отчета",
@@ -174,26 +174,26 @@ function prevStep() {
                 @update:actualThreats="formData.actualThreats = $event"
               />
             </div>
-            <div v-else-if="currentStep === 5">
+            <!--            <div v-else-if="currentStep === 5">
               <ThreatsExecutionMethods v-model="formData.threatsExecution" />
-            </div>
-            <div v-else-if="currentStep === 6">
+            </div>-->
+            <div v-else-if="currentStep === 5">
               <ActualThreats
                 v-model="formData.actualThreats"
                 @update:tacticsAndTechniques="formData.tacticsData = $event"
               />
             </div>
-            <div v-else-if="currentStep === 7">
+            <div v-else-if="currentStep === 6">
               <TacticTechnic
                 v-model="formData.tacticsAndTechniquesSelection"
                 :threats="formData.actualThreats"
                 :tactics-data="formData.tacticsData"
               />
             </div>
-            <div v-else-if="currentStep === 8">
+            <div v-else-if="currentStep === 7">
               <GenerateReport :formData="formData" />
             </div>
-            <div v-else-if="currentStep === 9">
+            <div v-else-if="currentStep === 8">
               <FetchDefensiveMeasures v-model="formData.generalInformation" />
             </div>
           </div>
